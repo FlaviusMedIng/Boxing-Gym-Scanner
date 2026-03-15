@@ -1,6 +1,6 @@
 criteria:
-  min_surface_m2: 70
-  max_rent_chf_month: 2000
+  min_surface_m2: 50
+  max_rent_chf_month: 3000
   allowed_districts:
     - Champel
     - Eaux-Vives
@@ -42,7 +42,7 @@ sites:
   rosset:
     enabled: true
     start_urls:
-      - "https://www.rosset.ch/locations/"
+      - "https://www.rosset.ch/location/locaux-commerciaux/"
   pilet_renaud:
     enabled: true
     start_urls:
