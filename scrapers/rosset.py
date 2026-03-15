@@ -1,22 +1,47 @@
-from __future__ import annotations
+import requests
+from bs4 import BeautifulSoup
 
-from scrapers.base_scraper import BaseScraper
-from utils.parser import clean_text
+BASE_URL = "https://www.rosset.ch/location/locaux-commerciaux/all/geneve/"
 
+def scrape():
 
-class RossetScraper(BaseScraper):
-    name = "rosset"
-    use_playwright = False
+    listings = []
 
-    def parse_list_page(self, soup, base_url: str) -> list[dict]:
-        listings: list[dict] = []
-        cards = soup.select("article") or soup.select(".property-item") or soup.select("a[href]")
-        for card in cards:
-            link = card.find("a", href=True) if hasattr(card, "find") else None
+    for page in range(1,6):
+
+        url = f"{BASE_URL}?page_no={page}"
+
+        r = requests.get(url, timeout=30)
+
+        if r.status_code != 200:
+            break
+
+        soup = BeautifulSoup(r.text,"html.parser")
+
+        cards = soup.select("article")
+
+        if not cards:
+            break
+
+        for c in cards:
+
+            link = c.find("a")
+
             if not link:
                 continue
-            url = self.absolutize(base_url, link.get("href"))
-            blob = clean_text(card.get_text(" ", strip=True))
-            title = clean_text(link.get_text(" ", strip=True)) or blob[:120]
-            listings.append(self.make_listing(url=url, title=title, text_blob=blob, site=self.name, location_hint=blob))
-        return listings
+
+            title = c.get_text(strip=True)
+
+            listings.append({
+
+                "id": "rosset_"+link["href"],
+                "title": title,
+                "price": 0,
+                "surface": 0,
+                "location": "Geneve",
+                "url": link["href"],
+                "site": "rosset"
+
+            })
+
+    return listings
