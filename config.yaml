@@ -1,0 +1,68 @@
+criteria:
+  min_surface_m2: 70
+  max_rent_chf_month: 2000
+  allowed_districts:
+    - Champel
+    - Eaux-Vives
+    - Rive
+    - Rives
+    - Plainpalais
+    - Jonction
+  require_possible_changing_rooms: true
+  changing_room_keywords:
+    - vestiaire
+    - vestiaires
+    - sanitaire
+    - sanitaires
+    - douche
+    - douches
+    - wc
+    - toilettes
+    - local aménageable
+    - arcade
+    - open space
+  floors_preferred:
+    - rez
+    - ground
+    - arcade
+
+notifications:
+  telegram_enabled: true
+  email_enabled: false
+
+sites:
+  homegate:
+    enabled: true
+    start_urls:
+      - "https://www.homegate.ch/rent/industrial-object/city-geneva/matching-list"
+  realadvisor:
+    enabled: true
+    start_urls:
+      - "https://realadvisor.ch/fr/louer/ville-geneve/commercial"
+  rosset:
+    enabled: true
+    start_urls:
+      - "https://www.rosset.ch/locations/"
+  pilet_renaud:
+    enabled: true
+    start_urls:
+      - "https://www.pilet-renaud.ch/fr/location/commercial"
+  comparis:
+    enabled: true
+    start_urls:
+      - "https://fr.comparis.ch/immobilien/marktplatz/geneve/gewerbeobjekt/mieten"
+  immobilier_ch:
+    enabled: true
+    start_urls:
+      - "https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton"
+
+output:
+  sqlite_path: "data/listings.db"
+  excel_path: "data/listings.xlsx"
+  csv_path: "data/listings.csv"
+  log_path: "data/scanner.log"
+
+runtime:
+  request_timeout_seconds: 45
+  user_agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+  use_playwright_for_dynamic_sites: true
