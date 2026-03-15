@@ -57,3 +57,153 @@ requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.
 2026-03-15 23:33:16,823 [INFO] immobilier_ch returned 0 listings
 2026-03-15 23:33:17,393 [INFO] No new or changed matching listings.
 2026-03-15 23:33:17,393 [INFO] Run complete. Total processed=56
+2026-03-15 23:52:32,728 [INFO] Running scraper: homegate
+2026-03-15 23:53:18,345 [ERROR] Scraper homegate failed: Page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://www.homegate.ch/rent/industrial-object/city-geneva/matching-list", waiting until "networkidle"
+Traceback (most recent call last):
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/main.py", line 41, in main
+    items = scraper.scrape()
+            ^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/scrapers/base_scraper.py", line 43, in scrape
+    html = self.fetch_html(url)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/scrapers/base_scraper.py", line 32, in fetch_html
+    return fetch_dynamic_html(url, timeout_ms=self.timeout * 1000)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/utils/browser.py", line 10, in fetch_dynamic_html
+    page.goto(url, timeout=timeout_ms, wait_until="networkidle")
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/playwright/sync_api/_generated.py", line 9024, in goto
+    self._sync(
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/playwright/_impl/_page.py", line 552, in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/playwright/_impl/_frame.py", line 145, in goto
+    await self._channel.send("goto", locals_to_params(locals()))
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/playwright/_impl/_connection.py", line 61, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/playwright/_impl/_connection.py", line 528, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://www.homegate.ch/rent/industrial-object/city-geneva/matching-list", waiting until "networkidle"
+
+2026-03-15 23:53:18,346 [INFO] Running scraper: realadvisor
+2026-03-15 23:53:21,340 [INFO] realadvisor returned 57 listings
+2026-03-15 23:53:21,340 [INFO] Running scraper: rosset
+2026-03-15 23:54:06,517 [ERROR] Scraper rosset failed: HTTPSConnectionPool(host='www.rosset.ch', port=443): Max retries exceeded with url: /location/locaux-commerciaux/ (Caused by NewConnectionError("HTTPSConnection(host='www.rosset.ch', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable"))
+Traceback (most recent call last):
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/urllib3/connection.py", line 204, in _new_conn
+    sock = connection.create_connection(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/urllib3/util/connection.py", line 85, in create_connection
+    raise err
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/urllib3/util/connection.py", line 73, in create_connection
+    sock.connect(sa)
+OSError: [Errno 101] Network is unreachable
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/urllib3/connectionpool.py", line 488, in _make_request
+    raise new_e
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/urllib3/connectionpool.py", line 464, in _make_request
+    self._validate_conn(conn)
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/urllib3/connectionpool.py", line 1093, in _validate_conn
+    conn.connect()
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/urllib3/connection.py", line 759, in connect
+    self.sock = sock = self._new_conn()
+                       ^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/urllib3/connection.py", line 219, in _new_conn
+    raise NewConnectionError(
+urllib3.exceptions.NewConnectionError: HTTPSConnection(host='www.rosset.ch', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/urllib3/util/retry.py", line 535, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='www.rosset.ch', port=443): Max retries exceeded with url: /location/locaux-commerciaux/ (Caused by NewConnectionError("HTTPSConnection(host='www.rosset.ch', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/main.py", line 41, in main
+    items = scraper.scrape()
+            ^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/scrapers/base_scraper.py", line 43, in scrape
+    html = self.fetch_html(url)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/scrapers/base_scraper.py", line 33, in fetch_html
+    response = requests.get(url, timeout=self.timeout, headers={"User-Agent": self.user_agent})
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/requests/api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/requests/api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/requests/adapters.py", line 700, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='www.rosset.ch', port=443): Max retries exceeded with url: /location/locaux-commerciaux/ (Caused by NewConnectionError("HTTPSConnection(host='www.rosset.ch', port=443): Failed to establish a new connection: [Errno 101] Network is unreachable"))
+2026-03-15 23:54:06,519 [INFO] Running scraper: pilet_renaud
+2026-03-15 23:54:52,024 [ERROR] Scraper pilet_renaud failed: Page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://www.pilet-renaud.ch/fr/location/commercial", waiting until "networkidle"
+Traceback (most recent call last):
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/main.py", line 41, in main
+    items = scraper.scrape()
+            ^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/scrapers/base_scraper.py", line 43, in scrape
+    html = self.fetch_html(url)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/scrapers/base_scraper.py", line 32, in fetch_html
+    return fetch_dynamic_html(url, timeout_ms=self.timeout * 1000)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/utils/browser.py", line 10, in fetch_dynamic_html
+    page.goto(url, timeout=timeout_ms, wait_until="networkidle")
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/playwright/sync_api/_generated.py", line 9024, in goto
+    self._sync(
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/playwright/_impl/_page.py", line 552, in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/playwright/_impl/_frame.py", line 145, in goto
+    await self._channel.send("goto", locals_to_params(locals()))
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/playwright/_impl/_connection.py", line 61, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages/playwright/_impl/_connection.py", line 528, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Page.goto: Timeout 45000ms exceeded.
+Call log:
+  - navigating to "https://www.pilet-renaud.ch/fr/location/commercial", waiting until "networkidle"
+
+2026-03-15 23:54:52,026 [INFO] Running scraper: comparis
+2026-03-15 23:54:53,716 [INFO] comparis returned 0 listings
+2026-03-15 23:54:53,716 [INFO] Running scraper: immobilier_ch
+2026-03-15 23:54:57,414 [INFO] immobilier_ch returned 0 listings
+2026-03-15 23:54:58,158 [INFO] No new or changed matching listings.
+2026-03-15 23:54:58,158 [INFO] Run complete. Total processed=56
