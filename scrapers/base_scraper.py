@@ -1,44 +1,23 @@
 import requests
 from bs4 import BeautifulSoup
-from utils.browser import fetch_dynamic_html
 from urllib.parse import urljoin
 
 
 class BaseScraper:
 
     name = "base"
-    use_playwright = False
-    load_strategy = "domcontentloaded"
-    timeout = 45
-    user_agent = "Mozilla/5.0"
 
-    def __init__(self, site_cfg=None, config=None, logger=None):
+    def __init__(self, urls, timeout=20):
 
-        self.site_cfg = site_cfg or {}
-        self.config = config
-        self.logger = logger
+        self.urls = urls
+        self.timeout = timeout
+        self.user_agent = "Mozilla/5.0"
 
-        config_urls = (
-            self.site_cfg.get("urls")
-            or self.site_cfg.get("start_urls")
-            or []
-        )
+    def absolutize(self, base, href):
 
-        class_urls = getattr(self, "urls", [])
-
-        self.urls = config_urls or class_urls
-
-        if not self.urls and self.logger:
-            self.logger.warning(f"{self.name} has no URLs configured")
+        return urljoin(base, href)
 
     def fetch_html(self, url):
-
-        if self.use_playwright:
-            return fetch_dynamic_html(
-                url,
-                timeout_ms=self.timeout * 1000,
-                wait_strategy=self.load_strategy
-            )
 
         response = requests.get(
             url,
@@ -47,41 +26,41 @@ class BaseScraper:
         )
 
         response.raise_for_status()
+
         return response.text
+
+    def make_listing(
+        self,
+        url,
+        title=None,
+        price=None,
+        surface=None,
+        description=None,
+        district=None
+    ):
+
+        return {
+            "url": url,
+            "title": title,
+            "price": price,
+            "surface": surface,
+            "description": description,
+            "district": district,
+            "site": self.name
+        }
 
     def scrape(self):
 
         listings = []
 
-        if self.logger:
-            self.logger.info(f"{self.name} scraping {len(self.urls)} urls")
-
         for url in self.urls:
-
-            if self.logger:
-                self.logger.info(f"{self.name} fetching {url}")
 
             html = self.fetch_html(url)
 
             soup = BeautifulSoup(html, "html.parser")
 
-            listings.extend(self.parse_list_page(soup, url))
+            results = self.parse_list_page(soup, url)
+
+            listings.extend(results)
 
         return listings
-
-    def absolutize(self, base_url, href):
-
-        if not href:
-            return None
-
-        return urljoin(base_url, href)
-
-    def make_listing(self, url, title, text_blob, site, location_hint=None):
-
-        return {
-            "url": url,
-            "title": title,
-            "text": text_blob,
-            "site": site,
-            "location_hint": location_hint,
-        }
