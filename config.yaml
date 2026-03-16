@@ -63,6 +63,6 @@ output:
   log_path: "data/scanner.log"
 
 runtime:
-  request_timeout_seconds: 45
+  request_timeout_seconds: 90
   user_agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
   use_playwright_for_dynamic_sites: true
