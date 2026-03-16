@@ -75,3 +75,13 @@ class BaseScraper:
             return None
 
         return urljoin(base_url, href)
+
+    def make_listing(self, url, title, text_blob, site, location_hint=None):
+
+        return {
+            "url": url,
+            "title": title,
+            "text": text_blob,
+            "site": site,
+            "location_hint": location_hint,
+        }
