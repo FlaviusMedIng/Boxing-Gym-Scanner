@@ -8,13 +8,6 @@ class HomegateScraper(BaseScraper):
     use_playwright = True
     load_strategy = "domcontentloaded"
 
-    def __init__(self, site_cfg, config, logger):
-        super().__init__(site_cfg, config, logger)
-
-        self.urls = [
-            "https://www.homegate.ch/rent/industrial-object/city-geneva/matching-list"
-        ]
-
     def parse_list_page(self, soup, base_url):
 
         listings = []
@@ -34,13 +27,12 @@ class HomegateScraper(BaseScraper):
             title = clean_text(link.get_text())
 
             listings.append(
-                self.make_listing(
-                    url=url,
-                    title=title,
-                    text_blob=text_blob,
-                    site=self.name,
-                    location_hint=text_blob
-                )
+                {
+                    "url": url,
+                    "title": title,
+                    "text_blob": text_blob,
+                    "site": self.name
+                }
             )
 
         return listings
