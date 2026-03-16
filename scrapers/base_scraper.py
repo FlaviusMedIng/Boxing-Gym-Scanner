@@ -17,7 +17,8 @@ class BaseScraper:
         self.config = config
         self.logger = logger
 
-        config_urls = self.site_cfg.get("urls", [])
+        config_urls = (self.site_cfg.get("urls") or self.site_cfg.get("start_urls") or [])
+        
         class_urls = getattr(self, "urls", [])
 
         self.urls = config_urls or class_urls
