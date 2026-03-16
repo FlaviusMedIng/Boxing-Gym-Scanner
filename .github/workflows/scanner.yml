@@ -1,17 +1,13 @@
 name: geneva-gym-scanner
-
 on:
   workflow_dispatch:
   schedule:
     - cron: '0 */3 * * *'
-
 permissions:
   contents: write
-
 jobs:
   run-scanner:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,7 +35,37 @@ jobs:
         run: |
           python main.py
 
+      - name: Debug HTML dump
+        if: always()
+        run: |
+          python - <<'EOF'
+          import os, time
+          from playwright.sync_api import sync_playwright
+
+          os.makedirs("data", exist_ok=True)
+          sites = {
+            "homegate": "https://www.homegate.ch/rent/industrial-object/city-geneva/matching-list",
+            "pilet_renaud": "https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent#dHJhbnNhY3Rpb249cmVudCZ0eXBlPUFSQ0FERSZyb29tX21pbj0xJnJvb21fbWF4PTEyJnByaWNlX21heD04NTAwMDAmcHJpY2VfbWluPTEwMDAwJnN1cmZhY2VfbWluPTUmc3VyZmFjZV9tYXg9MTUwMCZvcmRlcl9ieT1hc2M="
+          }
+          with sync_playwright() as p:
+              browser = p.chromium.launch(headless=True)
+              for name, url in sites.items():
+                  page = browser.new_page(user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36")
+                  page.goto(url, wait_until="networkidle", timeout=60000)
+                  time.sleep(3)
+                  html = page.content()
+                  with open(f"data/debug_{name}.html", "w") as f:
+                      f.write(html)
+                  print(f"{name}: {len(html)} chars")
+                  for keyword in ["result-list", "listing", "property", "annonce", "arcade", "louer"]:
+                      count = html.lower().count(keyword)
+                      if count:
+                          print(f"  '{keyword}' trouve {count} fois")
+              browser.close()
+          EOF
+
       - name: Upload artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: scanner-results
@@ -48,6 +74,8 @@ jobs:
             data/listings.csv
             data/listings.db
             data/scanner.log
+            data/debug_homegate.html
+            data/debug_pilet_renaud.html
           if-no-files-found: warn
 
       - name: Commit updated data back to repository
@@ -58,33 +86,3 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m "Update scanner data [skip ci]"
           git push
-
-      - name: Debug HTML dump
-              if: always()
-              run: |
-                python - <<'EOF'
-                from playwright.sync_api import sync_playwright
-                import time
-      
-                sites = {
-                  "homegate": "https://www.homegate.ch/rent/industrial-object/city-geneva/matching-list",
-                  "pilet_renaud": "https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent#dHJhbnNhY3Rpb249cmVudCZ0eXBlPUFSQ0FERSZyb29tX21pbj0xJnJvb21fbWF4PTEyJnByaWNlX21heD04NTAwMDAmcHJpY2VfbWluPTEwMDAwJnN1cmZhY2VfbWluPTUmc3VyZmFjZV9tYXg9MTUwMCZvcmRlcl9ieT1hc2M="
-                }
-      
-                with sync_playwright() as p:
-                    browser = p.chromium.launch(headless=True)
-                    for name, url in sites.items():
-                        page = browser.new_page(user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36")
-                        page.goto(url, wait_until="networkidle", timeout=60000)
-                        time.sleep(3)
-                        html = page.content()
-                        with open(f"data/debug_{name}.html", "w") as f:
-                            f.write(html)
-                        print(f"{name}: {len(html)} chars")
-                        # Chercher les indices de contenu
-                        for keyword in ["result-list", "listing", "property", "annonce", "arcade", "louer"]:
-                            count = html.lower().count(keyword)
-                            if count:
-                                print(f"  '{keyword}' trouvé {count} fois")
-                    browser.close()
-                EOF
