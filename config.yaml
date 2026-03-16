@@ -46,7 +46,7 @@ sites:
   pilet_renaud:
     enabled: true
     start_urls:
-      - "https://www.pilet-renaud.ch/fr/location/commercial"
+      - "https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent#dHJhbnNhY3Rpb249cmVudCZ0eXBlPUFSQ0FERSZyb29tX21pbj0xJnJvb21fbWF4PTEyJnByaWNlX21heD04NTAwMDAmcHJpY2VfbWluPTEwMDAwJnN1cmZhY2VfbWluPTUmc3VyZmFjZV9tYXg9MTUwMCZvcmRlcl9ieT1hc2M="
   comparis:
     enabled: true
     start_urls:
