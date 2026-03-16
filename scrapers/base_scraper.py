@@ -1,7 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
-
 from utils.browser import fetch_dynamic_html
 
 
@@ -18,18 +16,18 @@ class BaseScraper:
         self.site_cfg = site_cfg or {}
         self.config = config
         self.logger = logger
-    
+
         config_urls = self.site_cfg.get("urls", [])
-    
-        # garder les urls définies dans le scraper
         class_urls = getattr(self, "urls", [])
-    
+
         self.urls = config_urls or class_urls
-        
+
+        if not self.urls and self.logger:
+            self.logger.warning(f"{self.name} has no URLs configured")
+
     def fetch_html(self, url):
 
         if self.use_playwright:
-
             return fetch_dynamic_html(
                 url,
                 timeout_ms=self.timeout * 1000,
@@ -43,30 +41,21 @@ class BaseScraper:
         )
 
         response.raise_for_status()
-
         return response.text
 
-    def absolutize(self, base_url, href):
-
-        return urljoin(base_url, href)
-
     def scrape(self):
-    
+
         listings = []
-    
+
         if self.logger:
             self.logger.info(f"{self.name} scraping {len(self.urls)} urls")
-    
-        for url in self.urls:
-    
-            html = self.fetch_html(url)
-    
-            soup = BeautifulSoup(html, "html.parser")
-    
-            listings.extend(self.parse_list_page(soup, url))
-    
-        return listings
 
-    if not self.urls:
-        if self.logger:
-            self.logger.warning(f"{self.name} has no URLs configured")
+        for url in self.urls:
+
+            html = self.fetch_html(url)
+
+            soup = BeautifulSoup(html, "html.parser")
+
+            listings.extend(self.parse_list_page(soup, url))
+
+        return listings
