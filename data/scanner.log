@@ -574,3 +574,34 @@ Call log:
 2026-03-16 20:26:51,203 [INFO] immobilier_ch returned 0 listings
 2026-03-16 20:26:51,673 [INFO] No new or changed matching listings.
 2026-03-16 20:26:51,673 [INFO] Run complete. Total processed=0
+2026-03-16 20:44:28,971 [INFO] Running scraper: homegate
+2026-03-16 20:44:28,971 [INFO] homegate scraping 1 urls
+2026-03-16 20:44:32,857 [INFO] homegate returned 0 listings
+2026-03-16 20:44:32,857 [INFO] Running scraper: realadvisor
+2026-03-16 20:44:32,857 [INFO] realadvisor scraping 1 urls
+2026-03-16 20:44:37,110 [ERROR] Scraper realadvisor failed: 'RealAdvisorScraper' object has no attribute 'absolutize'
+Traceback (most recent call last):
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/main.py", line 41, in main
+    items = scraper.scrape()
+            ^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/scrapers/base_scraper.py", line 60, in scrape
+    listings.extend(self.parse_list_page(soup, url))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/scrapers/realadvisor.py", line 18, in parse_list_page
+    url = self.absolutize(base_url, href)
+          ^^^^^^^^^^^^^^^
+AttributeError: 'RealAdvisorScraper' object has no attribute 'absolutize'
+2026-03-16 20:44:37,111 [INFO] Running scraper: rosset
+2026-03-16 20:44:37,111 [INFO] rosset scraping 1 urls
+2026-03-16 20:44:39,038 [INFO] rosset returned 0 listings
+2026-03-16 20:44:39,038 [INFO] Running scraper: pilet_renaud
+2026-03-16 20:44:39,038 [INFO] pilet_renaud scraping 1 urls
+2026-03-16 20:44:44,234 [INFO] pilet_renaud returned 0 listings
+2026-03-16 20:44:44,234 [INFO] Running scraper: comparis
+2026-03-16 20:44:44,234 [INFO] comparis scraping 1 urls
+2026-03-16 20:44:48,401 [INFO] comparis returned 0 listings
+2026-03-16 20:44:48,401 [INFO] Running scraper: immobilier_ch
+2026-03-16 20:44:48,401 [INFO] immobilier_ch scraping 1 urls
+2026-03-16 20:44:53,775 [INFO] immobilier_ch returned 0 listings
+2026-03-16 20:44:54,287 [INFO] No new or changed matching listings.
+2026-03-16 20:44:54,287 [INFO] Run complete. Total processed=0
