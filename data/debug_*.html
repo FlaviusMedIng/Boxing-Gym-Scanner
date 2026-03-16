@@ -1,0 +1,12 @@
+- name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: scanner-results
+          path: |
+            data/listings.xlsx
+            data/listings.csv
+            data/listings.db
+            data/scanner.log
+            data/debug_homegate.html
+            data/debug_pilet_renaud.html
+          if-no-files-found: warn
