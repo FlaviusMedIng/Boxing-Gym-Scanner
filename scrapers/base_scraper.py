@@ -1,4 +1,5 @@
 import re
+import hashlib
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
@@ -88,7 +89,9 @@ class BaseScraper:
     def make_listing(self, url, title=None, price_chf=None,
                      surface_m2=None, rooms=None,
                      text_blob=None, site=None, location_hint=None) -> dict:
+        listing_id = hashlib.md5((url or "").encode()).hexdigest()
         return {
+            "id":            listing_id,   # ← ajout clé
             "url":           url,
             "title":         title,
             "price_chf":     price_chf,
