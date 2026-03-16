@@ -11,28 +11,30 @@ class HomegateScraper(BaseScraper):
     def parse_list_page(self, soup, base_url):
 
         listings = []
-
-        cards = soup.select("a[data-testid='listing-link']")
-
-        for link in cards:
-
-            href = link.get("href")
-
+    
+        cards = soup.select("a[href*='/rent/'][class]")
+    
+        for card in cards:
+    
+            href = card.get("href")
+    
             if not href:
                 continue
-
+    
             url = self.absolutize(base_url, href)
-
-            text_blob = clean_text(link.parent.get_text(" ", strip=True))
-            title = clean_text(link.get_text())
-
+    
+            text_blob = clean_text(card.get_text(" ", strip=True))
+    
+            title = text_blob[:120]
+    
             listings.append(
-                {
-                    "url": url,
-                    "title": title,
-                    "text_blob": text_blob,
-                    "site": self.name
-                }
+                self.make_listing(
+                    url=url,
+                    title=title,
+                    text_blob=text_blob,
+                    site=self.name,
+                    location_hint=text_blob
+                )
             )
-
+    
         return listings
