@@ -51,15 +51,22 @@ class BaseScraper:
         return urljoin(base_url, href)
 
     def scrape(self):
-
+    
         listings = []
-
+    
+        if self.logger:
+            self.logger.info(f"{self.name} scraping {len(self.urls)} urls")
+    
         for url in self.urls:
-
+    
             html = self.fetch_html(url)
-
+    
             soup = BeautifulSoup(html, "html.parser")
-
+    
             listings.extend(self.parse_list_page(soup, url))
-
+    
         return listings
+
+    if not self.urls:
+        if self.logger:
+            self.logger.warning(f"{self.name} has no URLs configured")
