@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 
 from utils.browser import fetch_dynamic_html
 
@@ -7,14 +8,19 @@ from utils.browser import fetch_dynamic_html
 class BaseScraper:
 
     name = "base"
-
     use_playwright = False
-
     load_strategy = "domcontentloaded"
-
     timeout = 45
-
     user_agent = "Mozilla/5.0"
+
+    def __init__(self, site_cfg=None, config=None, logger=None):
+
+        self.site_cfg = site_cfg or {}
+        self.config = config
+        self.logger = logger
+
+        # urls peuvent venir du config.yaml
+        self.urls = self.site_cfg.get("urls", [])
 
     def fetch_html(self, url):
 
@@ -35,6 +41,10 @@ class BaseScraper:
         response.raise_for_status()
 
         return response.text
+
+    def absolutize(self, base_url, href):
+
+        return urljoin(base_url, href)
 
     def scrape(self):
 
