@@ -18,10 +18,14 @@ class BaseScraper:
         self.site_cfg = site_cfg or {}
         self.config = config
         self.logger = logger
-
-        # urls peuvent venir du config.yaml
-        self.urls = self.site_cfg.get("urls", [])
-
+    
+        config_urls = self.site_cfg.get("urls", [])
+    
+        # garder les urls définies dans le scraper
+        class_urls = getattr(self, "urls", [])
+    
+        self.urls = config_urls or class_urls
+        
     def fetch_html(self, url):
 
         if self.use_playwright:
