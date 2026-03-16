@@ -605,3 +605,40 @@ AttributeError: 'RealAdvisorScraper' object has no attribute 'absolutize'
 2026-03-16 20:44:53,775 [INFO] immobilier_ch returned 0 listings
 2026-03-16 20:44:54,287 [INFO] No new or changed matching listings.
 2026-03-16 20:44:54,287 [INFO] Run complete. Total processed=0
+2026-03-16 20:57:48,837 [INFO] Running scraper: homegate
+2026-03-16 20:57:48,837 [INFO] homegate scraping 1 urls
+2026-03-16 20:57:48,837 [INFO] homegate fetching https://www.homegate.ch/rent/industrial-object/city-geneva/matching-list
+2026-03-16 20:57:53,134 [INFO] homegate returned 0 listings
+2026-03-16 20:57:53,134 [INFO] Running scraper: realadvisor
+2026-03-16 20:57:53,134 [INFO] realadvisor scraping 1 urls
+2026-03-16 20:57:53,134 [INFO] realadvisor fetching https://realadvisor.ch/fr/louer/ville-geneve/commercial
+2026-03-16 20:58:02,584 [ERROR] Scraper realadvisor failed: 'RealAdvisorScraper' object has no attribute 'make_listing'
+Traceback (most recent call last):
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/main.py", line 41, in main
+    items = scraper.scrape()
+            ^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/scrapers/base_scraper.py", line 68, in scrape
+    listings.extend(self.parse_list_page(soup, url))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/scrapers/realadvisor.py", line 38, in parse_list_page
+    self.make_listing(
+    ^^^^^^^^^^^^^^^^^
+AttributeError: 'RealAdvisorScraper' object has no attribute 'make_listing'
+2026-03-16 20:58:02,584 [INFO] Running scraper: rosset
+2026-03-16 20:58:02,584 [INFO] rosset scraping 1 urls
+2026-03-16 20:58:02,584 [INFO] rosset fetching https://www.rosset.ch/location/locaux-commerciaux/
+2026-03-16 20:58:04,990 [INFO] rosset returned 0 listings
+2026-03-16 20:58:04,990 [INFO] Running scraper: pilet_renaud
+2026-03-16 20:58:04,990 [INFO] pilet_renaud scraping 1 urls
+2026-03-16 20:58:04,990 [INFO] pilet_renaud fetching https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent#dHJhbnNhY3Rpb249cmVudCZ0eXBlPUFSQ0FERSZyb29tX21pbj0xJnJvb21fbWF4PTEyJnByaWNlX21heD04NTAwMDAmcHJpY2VfbWluPTEwMDAwJnN1cmZhY2VfbWluPTUmc3VyZmFjZV9tYXg9MTUwMCZvcmRlcl9ieT1hc2M=
+2026-03-16 20:58:10,290 [INFO] pilet_renaud returned 0 listings
+2026-03-16 20:58:10,290 [INFO] Running scraper: comparis
+2026-03-16 20:58:10,290 [INFO] comparis scraping 1 urls
+2026-03-16 20:58:10,290 [INFO] comparis fetching https://fr.comparis.ch/immobilien/marktplatz/geneve/gewerbeobjekt/mieten
+2026-03-16 20:58:14,304 [INFO] comparis returned 0 listings
+2026-03-16 20:58:14,304 [INFO] Running scraper: immobilier_ch
+2026-03-16 20:58:14,304 [INFO] immobilier_ch scraping 1 urls
+2026-03-16 20:58:14,304 [INFO] immobilier_ch fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton
+2026-03-16 20:58:19,850 [INFO] immobilier_ch returned 0 listings
+2026-03-16 20:58:20,648 [INFO] No new or changed matching listings.
+2026-03-16 20:58:20,648 [INFO] Run complete. Total processed=0
