@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from utils.browser import fetch_dynamic_html
+from urllib.parse import urljoin
 
 
 class BaseScraper:
@@ -17,8 +18,12 @@ class BaseScraper:
         self.config = config
         self.logger = logger
 
-        config_urls = (self.site_cfg.get("urls") or self.site_cfg.get("start_urls") or [])
-        
+        config_urls = (
+            self.site_cfg.get("urls")
+            or self.site_cfg.get("start_urls")
+            or []
+        )
+
         class_urls = getattr(self, "urls", [])
 
         self.urls = config_urls or class_urls
@@ -53,6 +58,9 @@ class BaseScraper:
 
         for url in self.urls:
 
+            if self.logger:
+                self.logger.info(f"{self.name} fetching {url}")
+
             html = self.fetch_html(url)
 
             soup = BeautifulSoup(html, "html.parser")
@@ -60,3 +68,10 @@ class BaseScraper:
             listings.extend(self.parse_list_page(soup, url))
 
         return listings
+
+    def absolutize(self, base_url, href):
+
+        if not href:
+            return None
+
+        return urljoin(base_url, href)
