@@ -89,19 +89,39 @@ class BaseScraper:
     def make_listing(self, url, title=None, price_chf=None,
                      surface_m2=None, rooms=None,
                      text_blob=None, site=None, location_hint=None) -> dict:
-        listing_id = hashlib.md5((url or "").encode()).hexdigest()
+        import hashlib
+        from utils.parser import (
+            parse_price_chf_month, parse_surface_m2,
+            detect_district, extract_possible_changing_room
+        )
+        criteria = self.config.get("criteria", {})
+        keywords = criteria.get("changing_room_keywords", [])
+    
+        combined = " ".join(filter(None, [text_blob, title, location_hint]))
+    
+        # Si le scraper n'a pas parsé le prix/surface, on tente via parser
+        if price_chf is None:
+            price_chf = parse_price_chf_month(combined)
+        if surface_m2 is None:
+            surface_m2 = parse_surface_m2(combined)
+    
+        district = detect_district(combined)
+        possible_changing_room = extract_possible_changing_room(combined, keywords)
+    
         return {
-            "id":            listing_id,   # ← ajout clé
-            "url":           url,
-            "title":         title,
-            "price_chf":     price_chf,
-            "surface_m2":    surface_m2,
-            "rooms":         rooms,
-            "text_blob":     text_blob,
-            "location_hint": location_hint,
-            "site":          site or self.name,
+            "id":                    hashlib.md5((url or "").encode()).hexdigest(),
+            "url":                   url,
+            "title":                 title,
+            "price_chf":             price_chf,
+            "surface_m2":            surface_m2,
+            "rooms":                 rooms,
+            "text_blob":             text_blob,
+            "location_hint":         location_hint,
+            "district":              district,
+            "possible_changing_room": possible_changing_room,
+            "site":                  site or self.name,
         }
-
+    
     # ------------------------------------------------------------------ #
     #  Filtrage                                                            #
     # ------------------------------------------------------------------ #
