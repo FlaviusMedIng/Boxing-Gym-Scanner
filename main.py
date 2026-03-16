@@ -1,7 +1,5 @@
 from __future__ import annotations
-
 from pathlib import Path
-
 from filters.gym_filter import matches_criteria
 from notifier.email_notifier import send_email
 from notifier.telegram_notifier import send_telegram
@@ -11,18 +9,21 @@ from storage.database import Database
 from storage.excel_export import export_all
 from utils.config import load_config
 from utils.logger import get_logger
+import hashlib
 
+def make_id(listing: dict) -> str:
+    """Génère un ID stable basé sur l'URL."""
+    url = listing.get("url") or ""
+    return hashlib.md5(url.encode()).hexdigest()
 
 def format_listing_message(listing: dict) -> str:
     return (
         f"[{listing['site']}] {listing['title']}\n"
-        f"Loyer: {listing.get('price_chf_month') or 'N/A'} CHF/mois\n"
+        f"Loyer: {listing.get('price_chf') or 'N/A'} CHF/mois\n"
         f"Surface: {listing.get('surface_m2') or 'N/A'} m²\n"
-        f"Quartier: {listing.get('district') or listing.get('location_text') or 'N/A'}\n"
         f"Score: {listing.get('score', 0)}\n"
         f"Lien: {listing['url']}"
     )
-
 
 def main() -> int:
     config = load_config("config.yaml")
@@ -33,7 +34,6 @@ def main() -> int:
     db.init_db()
 
     scrapers = build_scrapers(config, logger)
-
     all_raw: list[dict] = []
     for scraper in scrapers:
         try:
@@ -50,14 +50,22 @@ def main() -> int:
     seen_ids: set[str] = set()
 
     for listing in all_raw:
-        if not listing.get("id") or not listing.get("url"):
+        # Ignorer les listings sans URL
+        if not listing.get("url"):
+            logger.warning("Listing sans URL ignoré: %s", listing)
             continue
+
+        # Générer l'ID depuis l'URL si absent
+        if not listing.get("id"):
+            listing["id"] = make_id(listing)
+
         if listing["id"] in seen_ids:
             continue
         seen_ids.add(listing["id"])
 
         listing["score"] = compute_score(listing, config)
         listing["matches"] = matches_criteria(listing, config)
+
         processed.append(listing)
 
         change_type = db.upsert_listing(listing)
@@ -70,10 +78,15 @@ def main() -> int:
     db.mark_missing_as_removed(seen_ids)
     export_all(processed, db, config)
 
+    logger.info(
+        "Run complete. Total scraped=%s | processed=%s | new=%s | changed=%s",
+        len(all_raw), len(processed), len(new_listings), len(changed_listings)
+    )
+
     messages: list[str] = []
     if new_listings:
         messages.append(
-            "Nouvelles annonces trouvées:\n\n" +
+            "Nouvelles annonces:\n\n" +
             "\n\n".join(format_listing_message(x) for x in new_listings[:10])
         )
     if changed_listings:
@@ -82,8 +95,7 @@ def main() -> int:
             "\n\n".join(format_listing_message(x) for x in changed_listings[:10])
         )
 
-    joined_message = "\n\n----------------\n\n".join(messages).strip()
-
+    joined_message = "\n\n---\n\n".join(messages).strip()
     if joined_message:
         if config["notifications"].get("telegram_enabled", False):
             send_telegram(joined_message, logger)
@@ -96,9 +108,7 @@ def main() -> int:
     else:
         logger.info("No new or changed matching listings.")
 
-    logger.info("Run complete. Total processed=%s", len(processed))
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())
