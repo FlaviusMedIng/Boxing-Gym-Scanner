@@ -13,6 +13,31 @@ class HomegateScraper(BaseScraper):
         listings = []
         page = 1
 
+        session = requests.Session()
+        # Simuler une vraie session navigateur pour éviter le 403
+        session.headers.update({
+            "User-Agent":      self.user_agent,
+            "Accept":          "application/json, text/plain, */*",
+            "Accept-Language": "fr-CH,fr;q=0.9,en;q=0.8",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Referer":         "https://www.homegate.ch/",
+            "Origin":          "https://www.homegate.ch",
+            "Connection":      "keep-alive",
+            "Sec-Fetch-Dest":  "empty",
+            "Sec-Fetch-Mode":  "cors",
+            "Sec-Fetch-Site":  "same-site",
+        })
+
+        # Visiter d'abord la page principale pour obtenir les cookies
+        try:
+            session.get(
+                "https://www.homegate.ch/rent/industrial-object/city-geneva/matching-list",
+                timeout=self.timeout,
+                allow_redirects=True,
+            )
+        except Exception as e:
+            self.logger.warning(f"[homegate] Pré-visite échouée (non bloquant): {e}")
+
         while True:
             params = {
                 "offerType":     "rent",
@@ -24,16 +49,12 @@ class HomegateScraper(BaseScraper):
                 "sortDirection": "desc",
             }
             try:
-                resp = requests.get(
+                resp = session.get(
                     self.API_URL,
                     params=params,
-                    headers={
-                        "User-Agent": self.user_agent,
-                        "Accept":     "application/json",
-                        "Referer":    "https://www.homegate.ch/",
-                    },
                     timeout=self.timeout,
                 )
+                self.logger.info(f"[homegate] API status: {resp.status_code}")
                 resp.raise_for_status()
                 data = resp.json()
             except Exception as e:
@@ -56,7 +77,9 @@ class HomegateScraper(BaseScraper):
             page += 1
 
         passed = [l for l in listings if self.matches_filters(l)]
-        self.logger.info(f"[homegate] {len(listings)} annonces, {len(passed)} après filtrage")
+        self.logger.info(
+            f"[homegate] {len(listings)} annonces, {len(passed)} après filtrage"
+        )
         return passed
 
     def _parse_item(self, item: dict) -> dict | None:
@@ -65,13 +88,12 @@ class HomegateScraper(BaseScraper):
         if not uid:
             return None
 
-        url = f"https://www.homegate.ch/rent/{uid}"
-
-        addr    = d.get("address", {})
-        street  = addr.get("street", "")
-        city    = addr.get("locality", "")
+        url      = f"https://www.homegate.ch/rent/{uid}"
+        addr     = d.get("address", {})
+        street   = addr.get("street", "")
+        city     = addr.get("locality", "")
         district = addr.get("district", city)
-        title   = clean_text(f"{street}, {city}".strip(", ")) or city
+        title    = clean_text(f"{street}, {city}".strip(", ")) or city
 
         prices    = d.get("prices", {})
         rent      = prices.get("rent", {})
@@ -81,8 +103,8 @@ class HomegateScraper(BaseScraper):
         surface_m2 = chars.get("totalFloorSpace") or chars.get("livingSpace")
 
         loc  = d.get("localization", {})
-        desc = loc.get("fr", {}).get("description", {}).get("text", "") or \
-               loc.get("de", {}).get("description", {}).get("text", "") or ""
+        desc = (loc.get("fr", {}).get("description", {}).get("text") or
+                loc.get("de", {}).get("description", {}).get("text") or "")
 
         text_blob = clean_text(f"{title} {desc} {district}")
 
