@@ -550,3 +550,27 @@ Call log:
 2026-03-16 20:00:43,867 [INFO] immobilier_ch returned 0 listings
 2026-03-16 20:00:44,409 [INFO] No new or changed matching listings.
 2026-03-16 20:00:44,409 [INFO] Run complete. Total processed=0
+2026-03-16 20:26:43,206 [WARNING] homegate has no URLs configured
+2026-03-16 20:26:43,206 [WARNING] realadvisor has no URLs configured
+2026-03-16 20:26:43,206 [WARNING] comparis has no URLs configured
+2026-03-16 20:26:43,206 [WARNING] immobilier_ch has no URLs configured
+2026-03-16 20:26:43,206 [INFO] Running scraper: homegate
+2026-03-16 20:26:43,206 [INFO] homegate scraping 0 urls
+2026-03-16 20:26:43,206 [INFO] homegate returned 0 listings
+2026-03-16 20:26:43,207 [INFO] Running scraper: realadvisor
+2026-03-16 20:26:43,207 [INFO] realadvisor scraping 0 urls
+2026-03-16 20:26:43,207 [INFO] realadvisor returned 0 listings
+2026-03-16 20:26:43,207 [INFO] Running scraper: rosset
+2026-03-16 20:26:43,207 [INFO] rosset scraping 1 urls
+2026-03-16 20:26:45,701 [INFO] rosset returned 0 listings
+2026-03-16 20:26:45,701 [INFO] Running scraper: pilet_renaud
+2026-03-16 20:26:45,701 [INFO] pilet_renaud scraping 1 urls
+2026-03-16 20:26:51,202 [INFO] pilet_renaud returned 0 listings
+2026-03-16 20:26:51,202 [INFO] Running scraper: comparis
+2026-03-16 20:26:51,202 [INFO] comparis scraping 0 urls
+2026-03-16 20:26:51,202 [INFO] comparis returned 0 listings
+2026-03-16 20:26:51,203 [INFO] Running scraper: immobilier_ch
+2026-03-16 20:26:51,203 [INFO] immobilier_ch scraping 0 urls
+2026-03-16 20:26:51,203 [INFO] immobilier_ch returned 0 listings
+2026-03-16 20:26:51,673 [INFO] No new or changed matching listings.
+2026-03-16 20:26:51,673 [INFO] Run complete. Total processed=0
