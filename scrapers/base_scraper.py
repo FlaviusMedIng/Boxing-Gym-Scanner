@@ -91,19 +91,24 @@ class BaseScraper:
                      text_blob=None, site=None, location_hint=None) -> dict:
         import hashlib
         from utils.parser import (
-            parse_price_chf_month, parse_surface_m2,
+            compute_monthly_rent, parse_surface_m2,
             detect_district, extract_possible_changing_room
         )
         criteria = self.config.get("criteria", {})
         keywords = criteria.get("changing_room_keywords", [])
-    
         combined = " ".join(filter(None, [text_blob, title, location_hint]))
     
-        # Si le scraper n'a pas parsé le prix/surface, on tente via parser
+        # Normaliser le prix en CHF/mois depuis n'importe quelle unité
         if price_chf is None:
-            price_chf = parse_price_chf_month(combined)
+            price_chf = compute_monthly_rent(combined, surface_m2)
+        
+        # Si on a le prix mais pas la surface, tenter de parser la surface
         if surface_m2 is None:
             surface_m2 = parse_surface_m2(combined)
+        
+        # Recalculer avec la surface si le premier essai a échoué
+        if price_chf is None and surface_m2 is not None:
+            price_chf = compute_monthly_rent(combined, surface_m2)
     
         district = detect_district(combined)
         possible_changing_room = extract_possible_changing_room(combined, keywords)
