@@ -9,11 +9,14 @@ class PiletRenaudScraper(BaseScraper):
     use_playwright = False
     BASE_URL = "https://www.pilet-renaud.ch"
 
+    # URLs à exclure — pages de navigation
+    _EXCLUDED = ["/estimer", "/contact", "/vendre", "/acheter", "/accueil/search$"]
+
     def scrape(self) -> list[dict]:
         url = self.urls[0] if self.urls else \
             "https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent"
-
         self.logger.info(f"[pilet_renaud] Playwright → {url}")
+
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             context = browser.new_context(
@@ -40,28 +43,34 @@ class PiletRenaudScraper(BaseScraper):
     def parse_list_page(self, soup, base_url) -> list[dict]:
         listings = []
 
-        # Sélecteur exact issu du debug : div.item avec id="item-XXXX"
-        cards = soup.select("div.item")
-        self.logger.info(f"[pilet_renaud] {len(cards)} cartes div.item trouvées")
+        # Structure réelle : a.item-link > div.item#item-XXXX
+        # Donc on sélectionne les liens a.item-link directement
+        links = soup.select("a.item-link[href]")
+        self.logger.info(f"[pilet_renaud] {len(links)} liens a.item-link trouvés")
 
-        for card in cards:
-            # Le lien est a.item-link qui CONTIENT la carte
-            # ou un <a> parent — on cherche dans les deux sens
-            link = card.select_one("a.item-link") or card.select_one("a[href]")
+        if not links:
+            # Fallback : div.item avec id numérique
+            links = []
+            for div in soup.select("div.item[id]"):
+                if re.match(r"item-\d+", div.get("id", "")):
+                    parent = div.parent
+                    if parent and parent.name == "a":
+                        links.append(parent)
 
-            # Parfois la carte EST à l'intérieur du lien
-            if not link:
-                parent = card.parent
-                if parent and parent.name == "a":
-                    link = parent
-
-            if not link:
+        for link in links:
+            href = link.get("href", "")
+            if not href or self._is_excluded(href):
                 continue
 
-            href = link.get("href", "")
-            url  = self.absolutize(self.BASE_URL, href)
+            # Vraie annonce = URL avec ID numérique en fin
+            if not re.search(r"-\d{4,}$", href):
+                continue
 
-            # Titre : p.title dans div.dotdotdot-item-title
+            url = self.absolutize(self.BASE_URL, href)
+
+            # Le div.item est à l'intérieur du lien
+            card = link.select_one("div.item") or link
+
             title_el = (
                 card.select_one("p.title") or
                 card.select_one(".dotdotdot-item-title p") or
@@ -70,15 +79,9 @@ class PiletRenaudScraper(BaseScraper):
             )
             title = clean_text(title_el.get_text(" ", strip=True)) if title_el else ""
 
-            # Prix — chercher dans tout le texte de la carte
             text_blob = clean_text(card.get_text(" ", strip=True))
-            price_chf = self._parse_price(text_blob)
-
-            # Surface
+            price_chf  = self._parse_price(text_blob)
             surface_m2 = self._parse_surface(text_blob)
-
-            # Localisation depuis l'ID de la carte ex: item-8372
-            item_id = card.get("id", "")
 
             listings.append(self.make_listing(
                 url=url,
@@ -92,13 +95,14 @@ class PiletRenaudScraper(BaseScraper):
 
         return listings
 
+    def _is_excluded(self, href: str) -> bool:
+        return any(e in href for e in self._EXCLUDED)
+
     def _parse_price(self, text: str) -> int | None:
-        # Cherche des montants CHF type "2'400.-" ou "2 400 CHF"
-        m = re.search(r"(\d[\d'\s]{2,})\s*(?:CHF|fr\.?|\.–|-)", text, re.I)
+        m = re.search(r"CHF\s*([\d']+)[.\-–]", text)
         if m:
-            digits = re.sub(r"[^\d]", "", m.group(1))
-            val = int(digits) if digits else None
-            if val and 500 <= val <= 500000:
+            val = int(re.sub(r"[^\d]", "", m.group(1)))
+            if 300 <= val <= 200000:
                 return val
         return None
 
