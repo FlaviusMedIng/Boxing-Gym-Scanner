@@ -1,80 +1,70 @@
 from scrapers.base_scraper import BaseScraper
 from utils.parser import clean_text
-import requests
-import re
+from playwright.sync_api import sync_playwright
+from bs4 import BeautifulSoup
+import re, time, json
 
 class HomegateScraper(BaseScraper):
     name = "homegate"
     use_playwright = False
-
-    API_URL = "https://api.homegate.ch/search/listingswithads"
+    BASE_URL = "https://www.homegate.ch"
 
     def scrape(self) -> list[dict]:
-        listings = []
-        page = 1
+        url = self.urls[0] if self.urls else \
+            "https://www.homegate.ch/rent/industrial-object/city-geneva/matching-list"
 
-        session = requests.Session()
-        # Simuler une vraie session navigateur pour éviter le 403
-        session.headers.update({
-            "User-Agent":      self.user_agent,
-            "Accept":          "application/json, text/plain, */*",
-            "Accept-Language": "fr-CH,fr;q=0.9,en;q=0.8",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Referer":         "https://www.homegate.ch/",
-            "Origin":          "https://www.homegate.ch",
-            "Connection":      "keep-alive",
-            "Sec-Fetch-Dest":  "empty",
-            "Sec-Fetch-Mode":  "cors",
-            "Sec-Fetch-Site":  "same-site",
-        })
+        self.logger.info(f"[homegate] Playwright+intercept → {url}")
+        api_responses = []
 
-        # Visiter d'abord la page principale pour obtenir les cookies
-        try:
-            session.get(
-                "https://www.homegate.ch/rent/industrial-object/city-geneva/matching-list",
-                timeout=self.timeout,
-                allow_redirects=True,
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
+                user_agent=self.user_agent,
+                locale="fr-CH",
+                viewport={"width": 1280, "height": 800},
             )
-        except Exception as e:
-            self.logger.warning(f"[homegate] Pré-visite échouée (non bloquant): {e}")
+            page = context.new_page()
 
-        while True:
-            params = {
-                "offerType":     "rent",
-                "categories[]":  "INDUSTRIAL_OBJECT",
-                "locationIds[]": "city-8660400",
-                "pageSize":      20,
-                "pageNumber":    page,
-                "sortBy":        "dateCreated",
-                "sortDirection": "desc",
-            }
-            try:
-                resp = session.get(
-                    self.API_URL,
-                    params=params,
-                    timeout=self.timeout,
-                )
-                self.logger.info(f"[homegate] API status: {resp.status_code}")
-                resp.raise_for_status()
-                data = resp.json()
-            except Exception as e:
-                self.logger.error(f"[homegate] API erreur page {page}: {e}")
-                break
+            # Intercepter les réponses JSON de l'API interne
+            def handle_response(response):
+                if "api.homegate.ch" in response.url and response.status == 200:
+                    try:
+                        data = response.json()
+                        if data.get("listings") or data.get("results"):
+                            api_responses.append(data)
+                            self.logger.info(
+                                f"[homegate] API interceptée: {response.url[:80]}"
+                            )
+                    except Exception:
+                        pass
 
-            items = data.get("listings") or data.get("results") or []
-            if not items:
-                break
+            page.on("response", handle_response)
+            page.route("**/*.{png,jpg,jpeg,gif,svg,woff,woff2,ttf}",
+                       lambda r: r.abort())
 
-            for item in items:
-                parsed = self._parse_item(item)
-                if parsed:
-                    listings.append(parsed)
+            page.goto(url, wait_until="domcontentloaded", timeout=90000)
+            time.sleep(6)  # laisser les appels XHR se terminer
+            html = page.content()
+            browser.close()
 
-            total = data.get("total", 0)
-            self.logger.info(f"[homegate] Page {page}: {len(items)} / {total}")
-            if page * 20 >= total:
-                break
-            page += 1
+        # Si on a intercepté des données API — chemin optimal
+        if api_responses:
+            self.logger.info(
+                f"[homegate] {len(api_responses)} réponses API interceptées"
+            )
+            listings = []
+            for data in api_responses:
+                for item in (data.get("listings") or data.get("results") or []):
+                    parsed = self._parse_item(item)
+                    if parsed:
+                        listings.append(parsed)
+        else:
+            # Fallback : parser le HTML rendu
+            self.logger.warning(
+                "[homegate] Aucune API interceptée, fallback HTML"
+            )
+            soup = BeautifulSoup(html, "html.parser")
+            listings = self.parse_list_page(soup, url)
 
         passed = [l for l in listings if self.matches_filters(l)]
         self.logger.info(
@@ -117,3 +107,26 @@ class HomegateScraper(BaseScraper):
             site=self.name,
             location_hint=f"{district} {city}",
         )
+
+    def parse_list_page(self, soup, base_url) -> list[dict]:
+        """Fallback HTML si l'interception API échoue."""
+        listings = []
+        cards = (
+            soup.select('div[data-test="result-list-item"]') or
+            soup.select('[class*="ResultList_listItem"]') or
+            soup.select('[class*="listing-item"]')
+        )
+        for card in cards:
+            link = card.select_one("a[href]")
+            if not link:
+                continue
+            url       = self.absolutize(self.BASE_URL, link.get("href", ""))
+            text_blob = clean_text(card.get_text(" ", strip=True))
+            listings.append(self.make_listing(
+                url=url,
+                title=text_blob[:120],
+                text_blob=text_blob,
+                site=self.name,
+                location_hint=text_blob,
+            ))
+        return listings
