@@ -9433,3 +9433,31 @@ Call log:
 2026-06-30 22:18:06,800 [INFO] immobilier_ch returned 0 listings
 2026-06-30 22:18:07,183 [INFO] Run complete. Total scraped=0 | processed=0 | new=0 | changed=0
 2026-06-30 22:18:07,183 [INFO] No new or changed matching listings.
+2026-07-01 04:12:39,540 [INFO] Running scraper: homegate
+2026-07-01 04:12:39,540 [INFO] [homegate] Playwright+intercept → https://www.homegate.ch/rent/industrial-object/city-geneva/matching-list
+2026-07-01 04:12:46,230 [WARNING] [homegate] Aucune API interceptée, fallback HTML
+2026-07-01 04:12:46,235 [INFO] [homegate] 0 annonces, 0 après filtrage
+2026-07-01 04:12:46,235 [INFO] homegate returned 0 listings
+2026-07-01 04:12:46,235 [INFO] Running scraper: realadvisor
+2026-07-01 04:12:46,235 [INFO] [realadvisor] Fetching https://realadvisor.ch/fr/louer/ville-geneve/commercial
+2026-07-01 04:12:49,885 [INFO] [realadvisor] 24 annonces, 0 après filtrage
+2026-07-01 04:12:49,885 [INFO] realadvisor returned 0 listings
+2026-07-01 04:12:49,886 [INFO] Running scraper: rosset
+2026-07-01 04:12:49,886 [INFO] [rosset] Fetching https://www.rosset.ch/location/locaux-commerciaux/
+2026-07-01 04:12:58,896 [INFO] [rosset] 0 annonces, 0 après filtrage
+2026-07-01 04:12:58,897 [INFO] rosset returned 0 listings
+2026-07-01 04:12:58,897 [INFO] Running scraper: pilet_renaud
+2026-07-01 04:12:58,897 [INFO] [pilet_renaud] Playwright → https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent#dHJhbnNhY3Rpb249cmVudCZ0eXBlPUFSQ0FERSZyb29tX21pbj0xJnJvb21fbWF4PTEyJnByaWNlX21heD04NTAwMDAmcHJpY2VfbWluPTEwMDAwJnN1cmZhY2VfbWluPTUmc3VyZmFjZV9tYXg9MTUwMCZvcmRlcl9ieT1hc2M=
+2026-07-01 04:13:07,256 [INFO] [pilet_renaud] 12 liens a.item-link trouvés
+2026-07-01 04:13:07,262 [INFO] [pilet_renaud] 12 annonces, 0 après filtrage
+2026-07-01 04:13:07,262 [INFO] pilet_renaud returned 0 listings
+2026-07-01 04:13:07,262 [INFO] Running scraper: comparis
+2026-07-01 04:13:07,262 [INFO] [comparis] Fetching https://fr.comparis.ch/immobilien/marktplatz/geneve/gewerbeobjekt/mieten
+2026-07-01 04:13:09,401 [INFO] [comparis] 0 annonces, 0 après filtrage
+2026-07-01 04:13:09,402 [INFO] comparis returned 0 listings
+2026-07-01 04:13:09,402 [INFO] Running scraper: immobilier_ch
+2026-07-01 04:13:09,402 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton
+2026-07-01 04:13:13,904 [INFO] [immobilier_ch] 0 annonces, 0 après filtrage
+2026-07-01 04:13:13,904 [INFO] immobilier_ch returned 0 listings
+2026-07-01 04:13:14,516 [INFO] Run complete. Total scraped=0 | processed=0 | new=0 | changed=0
+2026-07-01 04:13:14,516 [INFO] No new or changed matching listings.
