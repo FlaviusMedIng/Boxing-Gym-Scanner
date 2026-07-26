@@ -78,7 +78,8 @@ def main() -> int:
 
     db.mark_missing_as_removed(seen_ids)
     export_all(processed, db, config)
-    generate_site(db, config, config["output"].get("site_path", "docs/index.html"))
+    site_path = config["output"].get("site_path", "docs/index.html")
+    generate_site(db, config, site_path)
 
     logger.info(
         "Run complete. Total scraped=%s | processed=%s | new=%s | changed=%s",
@@ -104,8 +105,9 @@ def main() -> int:
         if config["notifications"].get("email_enabled", False):
             send_email(
                 subject="Geneva Gym Scanner - nouvelles annonces",
-                body=joined_message,
+                body=joined_message + "\n\nLe site complet (toutes les annonces, avec filtres) est joint à cet email.",
                 logger=logger,
+                attachment_path=site_path,
             )
     else:
         logger.info("No new or changed matching listings.")

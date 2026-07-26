@@ -28,7 +28,7 @@ criteria:
 
 notifications:
   telegram_enabled: true
-  email_enabled: false
+  email_enabled: true
 
 sites:
   # homegate et comparis sont protégés par des systèmes anti-bot actifs
