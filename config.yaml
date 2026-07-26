@@ -1,0 +1,100 @@
+criteria:
+  min_surface_m2: 50
+  max_rent_chf_month: 10000
+  allowed_districts:
+    - Champel
+    - Eaux-Vives
+    - Rive
+    - Rives
+    - Plainpalais
+    - Jonction
+  require_possible_changing_rooms: true
+  changing_room_keywords:
+    - vestiaire
+    - vestiaires
+    - sanitaire
+    - sanitaires
+    - douche
+    - douches
+    - wc
+    - toilettes
+    - local aménageable
+    - arcade
+    - open space
+  floors_preferred:
+    - rez
+    - ground
+    - arcade
+
+notifications:
+  telegram_enabled: true
+  email_enabled: false
+
+sites:
+  # homegate et comparis sont protégés par des systèmes anti-bot actifs
+  # (Cloudflare "Just a moment..." pour homegate, CAPTCHA DataDome pour
+  # comparis) qui bloquent tout accès automatisé, même avec un vrai
+  # navigateur headless. Contourner ce type de protection ne serait pas
+  # correct (ce n'est plus juste "lire une page publique"). Désactivés ici ;
+  # utilisez plutôt leurs alertes email natives (voir README).
+  homegate:
+    enabled: false
+    start_urls:
+      - "https://www.homegate.ch/rent/industrial-object/city-geneva/matching-list"
+  comparis:
+    enabled: false
+    start_urls:
+      - "https://fr.comparis.ch/immobilien/marktplatz/geneve/gewerbeobjekt/mieten"
+
+  realadvisor:
+    enabled: true
+    start_urls:
+      - "https://realadvisor.ch/fr/louer/ville-geneve/commercial"
+    max_pages: 1
+
+  rosset:
+    enabled: true
+    start_urls:
+      - "https://www.rosset.ch/louer"
+    max_pages: 1
+
+  pilet_renaud:
+    enabled: true
+    start_urls:
+      - "https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent#dHJhbnNhY3Rpb249cmVudCZ0eXBlPUFSQ0FERSZyb29tX21pbj0xJnJvb21fbWF4PTEyJnByaWNlX21heD04NTAwMDAmcHJpY2VfbWluPTEwMDAwJnN1cmZhY2VfbWluPTUmc3VyZmFjZV9tYXg9MTUwMCZvcmRlcl9ieT1hc2M="
+    max_pages: 1
+
+  immobilier_ch:
+    enabled: true
+    start_urls:
+      - "https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton"
+    max_pages: 6
+
+  acheter_louer:
+    enabled: true
+    start_urls:
+      - "https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html"
+    max_pages: 4
+
+  naef:
+    enabled: true
+    start_urls:
+      - "https://www.naef.ch/louer/surface-commerciales/geneve/geneve-ville/?sortingField=prix_desc&zoom=8"
+    max_pages: 1
+
+output:
+  sqlite_path: "data/listings.db"
+  excel_path: "data/listings.xlsx"
+  csv_path: "data/listings.csv"
+  log_path: "data/scanner.log"
+  # Page statique publiée gratuitement via GitHub Pages (dossier /docs)
+  site_path: "docs/index.html"
+
+runtime:
+  request_timeout_seconds: 90
+  user_agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+  use_playwright_for_dynamic_sites: true
+  # Politesse envers les sites scannés : délai entre deux requêtes et
+  # nombre de nouvelles tentatives en cas d'échec réseau/timeout.
+  delay_between_requests_seconds: 2
+  max_retries: 2
