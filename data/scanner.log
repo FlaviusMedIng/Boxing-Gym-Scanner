@@ -16400,3 +16400,47 @@ Call log:
 2026-08-04 14:25:55,297 [INFO] Run complete. Total scraped=240 | processed=240 | new=0 | changed=7
 2026-08-04 14:25:55,653 [INFO] Telegram notification sent.
 2026-08-04 14:25:58,010 [INFO] Email notification sent.
+2026-08-04 16:53:22,288 [INFO] Running scraper: realadvisor
+2026-08-04 16:53:22,288 [INFO] [realadvisor] Fetching https://realadvisor.ch/fr/louer/ville-geneve/commercial
+2026-08-04 16:53:28,229 [INFO] [realadvisor] page 1: 24 annonces (24 nouvelles)
+2026-08-04 16:53:28,230 [INFO] realadvisor returned 24 listings
+2026-08-04 16:53:28,230 [INFO] Running scraper: rosset
+2026-08-04 16:53:28,230 [INFO] [rosset] Fetching https://www.rosset.ch/louer
+2026-08-04 16:53:39,124 [INFO] [rosset] page 1: 4 annonces (4 nouvelles)
+2026-08-04 16:53:39,125 [INFO] rosset returned 4 listings
+2026-08-04 16:53:39,125 [INFO] Running scraper: pilet_renaud
+2026-08-04 16:53:39,125 [INFO] [pilet_renaud] Playwright → https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent#dHJhbnNhY3Rpb249cmVudCZ0eXBlPUFSQ0FERSZyb29tX21pbj0xJnJvb21fbWF4PTEyJnByaWNlX21heD04NTAwMDAmcHJpY2VfbWluPTEwMDAwJnN1cmZhY2VfbWluPTUmc3VyZmFjZV9tYXg9MTUwMCZvcmRlcl9ieT1hc2M=
+2026-08-04 16:53:47,239 [INFO] [pilet_renaud] 12 liens a.item-link trouvés
+2026-08-04 16:53:47,243 [INFO] [pilet_renaud] 12 annonces trouvées
+2026-08-04 16:53:47,243 [INFO] pilet_renaud returned 12 listings
+2026-08-04 16:53:47,244 [INFO] Running scraper: immobilier_ch
+2026-08-04 16:53:47,244 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton
+2026-08-04 16:53:51,814 [INFO] [immobilier_ch] page 1: 20 annonces (20 nouvelles)
+2026-08-04 16:53:53,815 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton/page-2
+2026-08-04 16:53:58,146 [INFO] [immobilier_ch] page 2: 17 annonces (12 nouvelles)
+2026-08-04 16:54:00,146 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton/page-3
+2026-08-04 16:54:04,377 [INFO] [immobilier_ch] page 3: 18 annonces (16 nouvelles)
+2026-08-04 16:54:06,377 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton/page-4
+2026-08-04 16:54:10,403 [INFO] [immobilier_ch] page 4: 16 annonces (16 nouvelles)
+2026-08-04 16:54:12,403 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton/page-5
+2026-08-04 16:54:16,445 [INFO] [immobilier_ch] page 5: 18 annonces (16 nouvelles)
+2026-08-04 16:54:18,445 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton/page-6
+2026-08-04 16:54:23,008 [INFO] [immobilier_ch] page 6: 19 annonces (19 nouvelles)
+2026-08-04 16:54:23,008 [INFO] immobilier_ch returned 99 listings
+2026-08-04 16:54:23,008 [INFO] Running scraper: acheter_louer
+2026-08-04 16:54:23,008 [INFO] [acheter_louer] Fetching https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html
+2026-08-04 16:54:26,656 [INFO] [acheter_louer] page 1: 90 annonces (90 nouvelles)
+2026-08-04 16:54:28,657 [INFO] [acheter_louer] Fetching https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html?page=2
+2026-08-04 16:55:59,238 [WARNING] [acheter_louer] Tentative 1 échouée sur https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html?page=2 (Page.goto: Timeout 90000ms exceeded.
+Call log:
+  - navigating to "https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html?page=2", waiting until "networkidle"
+), nouvel essai dans 3s
+2026-08-04 16:56:05,757 [INFO] [acheter_louer] page 2: 90 annonces (0 nouvelles)
+2026-08-04 16:56:05,758 [INFO] acheter_louer returned 90 listings
+2026-08-04 16:56:05,758 [INFO] Running scraper: naef
+2026-08-04 16:56:05,758 [INFO] [naef] Fetching https://www.naef.ch/louer/surface-commerciales/geneve/geneve-ville/?sortingField=prix_desc&zoom=8
+2026-08-04 16:56:22,598 [INFO] [naef] page 1: 18 annonces (18 nouvelles)
+2026-08-04 16:56:22,599 [INFO] naef returned 18 listings
+2026-08-04 16:56:23,530 [INFO] Run complete. Total scraped=247 | processed=247 | new=0 | changed=1
+2026-08-04 16:56:23,967 [INFO] Telegram notification sent.
+2026-08-04 16:56:26,665 [INFO] Email notification sent.
