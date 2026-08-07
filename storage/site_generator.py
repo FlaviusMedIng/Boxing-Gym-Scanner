@@ -4,7 +4,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-from utils.parser import DISTRICTS
+from utils.parser import DISTRICTS, PROPERTY_TYPES
 
 
 def _row_to_dict(row) -> dict:
@@ -14,6 +14,7 @@ def _row_to_dict(row) -> dict:
         "price_chf": row["price_chf"],
         "surface_m2": row["surface_m2"],
         "district": row["district"],
+        "property_type": row["property_type"],
         "possible_changing_room": bool(row["possible_changing_room"]),
         "score": row["score"],
         "matches": bool(row["matches"]),
@@ -166,6 +167,9 @@ _TEMPLATE = """<!doctype html>
     <label>Quartier
       <select id="f-district"><option value="">Tous</option></select>
     </label>
+    <label>Type de bien
+      <select id="f-type"><option value="">Tous</option></select>
+    </label>
     <label>Loyer max (CHF)
       <input type="number" id="f-price" placeholder="ex: 5000">
     </label>
@@ -196,6 +200,7 @@ const els = {
   text: document.getElementById('f-text'),
   site: document.getElementById('f-site'),
   district: document.getElementById('f-district'),
+  type: document.getElementById('f-type'),
   price: document.getElementById('f-price'),
   surface: document.getElementById('f-surface'),
   status: document.getElementById('f-status'),
@@ -219,6 +224,11 @@ for (const d of uniqueSorted(DATA.map(d => d.district))) {
   opt.value = d; opt.textContent = d;
   els.district.appendChild(opt);
 }
+for (const t of uniqueSorted(DATA.map(d => d.property_type))) {
+  const opt = document.createElement('option');
+  opt.value = t; opt.textContent = t;
+  els.type.appendChild(opt);
+}
 
 function escapeHtml(s) {
   return (s ?? '').toString().replace(/[&<>"']/g, c => ({
@@ -230,6 +240,7 @@ function render() {
   const text = els.text.value.trim().toLowerCase();
   const site = els.site.value;
   const district = els.district.value;
+  const type = els.type.value;
   const maxPrice = parseFloat(els.price.value);
   const minSurface = parseFloat(els.surface.value);
   const status = els.status.value;
@@ -240,6 +251,7 @@ function render() {
     if (matchesOnly && !d.matches) return false;
     if (site && d.site !== site) return false;
     if (district && d.district !== district) return false;
+    if (type && d.property_type !== type) return false;
     if (!isNaN(maxPrice) && d.price_chf != null && d.price_chf > maxPrice) return false;
     if (!isNaN(minSurface) && d.surface_m2 != null && d.surface_m2 < minSurface) return false;
     if (text && !(d.title || '').toLowerCase().includes(text)) return false;
@@ -265,6 +277,7 @@ function render() {
         <span>${d.price_chf != null ? d.price_chf.toLocaleString('fr-CH') + ' CHF/mois' : 'Prix non publié'}</span>
         <span>${d.surface_m2 != null ? d.surface_m2 + ' m²' : 'Surface inconnue'}</span>
         ${d.district ? `<span>${escapeHtml(d.district)}</span>` : ''}
+        ${d.property_type ? `<span>${escapeHtml(d.property_type)}</span>` : ''}
         ${d.possible_changing_room ? '<span class="badge">Vestiaires possibles</span>' : ''}
         ${d.status !== 'active' ? `<span class="badge">${escapeHtml(d.status)}</span>` : ''}
       </div>
@@ -275,7 +288,7 @@ function render() {
   els.empty.style.display = filtered.length ? 'none' : 'block';
 }
 
-for (const el of [els.text, els.site, els.district, els.price, els.surface, els.status, els.matchesOnly]) {
+for (const el of [els.text, els.site, els.district, els.type, els.price, els.surface, els.status, els.matchesOnly]) {
   el.addEventListener('input', render);
   el.addEventListener('change', render);
 }
@@ -300,6 +313,11 @@ def generate_criteria_page(config: dict, output_path: str = "docs/criteria.html"
     """
     criteria = config.get("criteria", {})
     allowed = set(criteria.get("allowed_districts", []))
+    # Liste vide dans config.yaml = tous les types acceptés (comportement
+    # historique, avant l'ajout de ce filtre) — donc rien de coché ne doit
+    # se lire comme "aucun type", pas "tous cochés par défaut" ; on ne
+    # pré-coche que si le père a déjà restreint explicitement la liste.
+    allowed_types = set(criteria.get("allowed_property_types", []))
 
     district_checkboxes = "\n".join(
         f'''      <label class="chk">
@@ -308,11 +326,19 @@ def generate_criteria_page(config: dict, output_path: str = "docs/criteria.html"
       </label>'''
         for d in DISTRICTS
     )
+    type_checkboxes = "\n".join(
+        f'''      <label class="chk">
+        <input type="checkbox" name="property_type" value="{t}" {"checked" if t in allowed_types else ""}>
+        {t}
+      </label>'''
+        for t in PROPERTY_TYPES
+    )
 
     out = Path(output_path)
     out.parent.mkdir(parents=True, exist_ok=True)
 
     html = _CRITERIA_TEMPLATE.replace("__DISTRICT_CHECKBOXES__", district_checkboxes)
+    html = html.replace("__TYPE_CHECKBOXES__", type_checkboxes)
     html = html.replace("__MIN_SURFACE__", str(criteria.get("min_surface_m2", 50)))
     html = html.replace("__MAX_RENT__", str(criteria.get("max_rent_chf_month", 10000)))
     html = html.replace(
@@ -395,6 +421,12 @@ __DISTRICT_CHECKBOXES__
         </div>
       </div>
       <div class="field">
+        <div class="title">Type de bien (aucune case cochée = tous les types acceptés)</div>
+        <div class="districts">
+__TYPE_CHECKBOXES__
+        </div>
+      </div>
+      <div class="field">
         <label class="toggle">
           <input type="checkbox" id="changing-room" __CHANGING_ROOM_CHECKED__>
           N'accepter que les locaux avec vestiaires/sanitaires possibles
@@ -429,11 +461,13 @@ document.getElementById('f').addEventListener('submit', async (e) => {
   statusEl.textContent = 'Envoi en cours...';
 
   const districts = [...document.querySelectorAll('input[name="district"]:checked')].map(el => el.value);
+  const propertyTypes = [...document.querySelectorAll('input[name="property_type"]:checked')].map(el => el.value);
   const payload = {
     key,
     min_surface_m2: Number(document.getElementById('surface').value),
     max_rent_chf_month: Number(document.getElementById('rent').value),
     allowed_districts: districts,
+    allowed_property_types: propertyTypes,
     require_possible_changing_rooms: document.getElementById('changing-room').checked,
   };
 

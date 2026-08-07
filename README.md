@@ -35,8 +35,10 @@ URL : <https://flaviusmeding.github.io/Boxing-Gym-Scanner/>
 
 ## Modifier les critères depuis le site
 `docs/criteria.html` permet de changer la surface minimum, le loyer
-maximum, les quartiers acceptés et l'exigence de vestiaires, sans compte
-GitHub ni édition manuelle de `config.yaml`. Le lien (avec la clé d'accès)
+maximum, les quartiers acceptés, le(s) type(s) de bien (Dépôt, Arcade,
+Atelier, Industriel, Bureau, Local commercial — aucune case cochée =
+tous les types) et l'exigence de vestiaires, sans compte GitHub ni édition
+manuelle de `config.yaml`. Le lien (avec la clé d'accès)
 est ajouté automatiquement à la fin de chaque notification Telegram/email.
 
 Flux complet :

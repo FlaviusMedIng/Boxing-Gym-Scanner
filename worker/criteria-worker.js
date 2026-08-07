@@ -27,6 +27,10 @@ const DISTRICTS = [
   "Cornavin", "Pâquis", "Servette", "Grottes", "Petit-Saconnex", "Charmilles",
 ];
 
+// Copie obligatoire de utils/parser.py::PROPERTY_TYPES — même remarque que
+// DISTRICTS ci-dessus : à tenir à jour manuellement + redéployer.
+const PROPERTY_TYPES = ["Dépôt", "Arcade", "Atelier", "Industriel", "Bureau", "Local commercial"];
+
 function corsHeaders(origin) {
   return {
     "Access-Control-Allow-Origin": origin || "*",
@@ -69,6 +73,11 @@ export default {
     const districts = Array.isArray(payload.allowed_districts)
       ? payload.allowed_districts.filter((d) => DISTRICTS.includes(d))
       : [];
+    // Contrairement aux quartiers, une liste vide est une valeur valide ici
+    // (= tous les types de bien acceptés, pas de filtre) : ne pas rejeter.
+    const propertyTypes = Array.isArray(payload.allowed_property_types)
+      ? payload.allowed_property_types.filter((t) => PROPERTY_TYPES.includes(t))
+      : [];
     const changingRoom = payload.require_possible_changing_rooms === true;
 
     if (!Number.isFinite(surface) || surface < 1 || surface > 5000) {
@@ -87,6 +96,7 @@ export default {
       `surface_min: ${surface}`,
       `loyer_max: ${rent}`,
       `quartiers: ${districts.join(", ")}`,
+      `types: ${propertyTypes.join(", ")}`,
       `vestiaires_requis: ${changingRoom ? "oui" : "non"}`,
     ].join("\n");
 

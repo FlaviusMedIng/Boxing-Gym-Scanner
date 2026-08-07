@@ -125,7 +125,7 @@ class BaseScraper:
         import hashlib
         from utils.parser import (
             compute_monthly_rent, parse_surface_m2,
-            detect_district, extract_possible_changing_room
+            detect_district, extract_possible_changing_room, detect_property_type
         )
         criteria = self.config.get("criteria", {})
         keywords = criteria.get("changing_room_keywords", [])
@@ -145,7 +145,8 @@ class BaseScraper:
     
         district = detect_district(combined)
         possible_changing_room = extract_possible_changing_room(combined, keywords)
-    
+        property_type = detect_property_type(combined)
+
         return {
             "id":                    hashlib.md5((url or "").encode()).hexdigest(),
             "url":                   url,
@@ -157,6 +158,7 @@ class BaseScraper:
             "location_hint":         location_hint,
             "district":              district,
             "possible_changing_room": possible_changing_room,
+            "property_type":         property_type,
             "site":                  site or self.name,
         }
     

@@ -172,8 +172,23 @@ why. It's still also attached to the email for offline viewing.
 **`storage/site_generator.py`** also renders `docs/criteria.html` (via
 `generate_criteria_page`), a form letting the father change
 `min_surface_m2` / `max_rent_chf_month` / `allowed_districts` /
-`require_possible_changing_rooms` without a GitHub account or touching this
-repo. Gated by a shared token (`CRITERIA_EDIT_TOKEN` GitHub secret, passed
+`allowed_property_types` / `require_possible_changing_rooms` without a
+GitHub account or touching this repo. `allowed_property_types` is the odd
+one out: an **empty list means "no filter, accept all types"**, not "reject
+everything" — unlike `allowed_districts`, which requires at least one
+selection (the Worker and `apply_criteria_update.py` both enforce this
+asymmetry; don't "fix" it to match districts). It's also stored as a
+flow-style YAML list (`[Dépôt, Arcade]` / `[]`) rather than block-style like
+`allowed_districts`, specifically so the regex substitution in
+`apply_criteria_update.py` can replace a single line unconditionally
+instead of needing "at least one existing item" to match against.
+`property_type` itself comes from `utils.parser.detect_property_type`
+(same per-listing detection pattern as `detect_district`), computed once in
+`BaseScraper.make_listing` and stored as its own SQLite column — matched by
+exact equality in `filters/gym_filter.py`, not substring search like
+district, because the vocabulary is closed (`PROPERTY_TYPES`) so there's no
+need for that leniency and it avoids an accent-encoding mismatch between a
+criteria label and free text. Gated by a shared token (`CRITERIA_EDIT_TOKEN` GitHub secret, passed
 as `?key=` in the link main.py builds) checked server-side by a Cloudflare
 Worker (`worker/criteria-worker.js`), never embedded in the static HTML.
 The Worker creates a GitHub issue titled `[criteria-update] ...`;

@@ -11,8 +11,8 @@ class Database:
 
     EXPECTED_COLUMNS = {
         "id", "site", "title", "url", "price_chf", "surface_m2", "district",
-        "location_hint", "text_blob", "possible_changing_room", "score",
-        "matches", "status", "first_seen_at", "last_seen_at",
+        "location_hint", "text_blob", "possible_changing_room", "property_type",
+        "score", "matches", "status", "first_seen_at", "last_seen_at",
         "last_changed_at", "content_hash",
     }
 
@@ -29,6 +29,7 @@ class Database:
                 location_hint         TEXT,
                 text_blob             TEXT,
                 possible_changing_room INTEGER DEFAULT 0,
+                property_type         TEXT,
                 score                 INTEGER DEFAULT 0,
                 matches               INTEGER DEFAULT 0,
                 status                TEXT DEFAULT 'active',
@@ -63,6 +64,7 @@ class Database:
                     location_hint         TEXT,
                     text_blob             TEXT,
                     possible_changing_room INTEGER DEFAULT 0,
+                    property_type         TEXT,
                     score                 INTEGER DEFAULT 0,
                     matches               INTEGER DEFAULT 0,
                     status                TEXT DEFAULT 'active',
@@ -77,7 +79,7 @@ class Database:
     def _content_hash(listing: dict) -> str:
         raw = "|".join(str(listing.get(k, "")) for k in [
             "title", "price_chf", "surface_m2", "district",
-            "possible_changing_room", "score", "matches"
+            "possible_changing_room", "property_type", "score", "matches"
         ])
         return hashlib.sha1(raw.encode()).hexdigest()
 
@@ -93,14 +95,15 @@ class Database:
                 INSERT INTO listings (
                     id, site, title, url, price_chf, surface_m2,
                     district, location_hint, text_blob,
-                    possible_changing_room, score, matches, status, content_hash
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?)
+                    possible_changing_room, property_type, score, matches, status, content_hash
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?)
             ''', (
                 listing["id"], listing["site"], listing.get("title"), listing["url"],
                 listing.get("price_chf"), listing.get("surface_m2"),
                 listing.get("district"), listing.get("location_hint"),
                 listing.get("text_blob"),
                 int(bool(listing.get("possible_changing_room"))),
+                listing.get("property_type"),
                 listing.get("score", 0), int(bool(listing.get("matches"))),
                 content_hash
             ))
@@ -112,7 +115,7 @@ class Database:
                 UPDATE listings SET
                     title=?, url=?, price_chf=?, surface_m2=?,
                     district=?, location_hint=?, text_blob=?,
-                    possible_changing_room=?, score=?, matches=?,
+                    possible_changing_room=?, property_type=?, score=?, matches=?,
                     status='active', content_hash=?,
                     last_seen_at=CURRENT_TIMESTAMP,
                     last_changed_at=CURRENT_TIMESTAMP
@@ -123,6 +126,7 @@ class Database:
                 listing.get("district"), listing.get("location_hint"),
                 listing.get("text_blob"),
                 int(bool(listing.get("possible_changing_room"))),
+                listing.get("property_type"),
                 listing.get("score", 0), int(bool(listing.get("matches"))),
                 content_hash, listing["id"]
             ))

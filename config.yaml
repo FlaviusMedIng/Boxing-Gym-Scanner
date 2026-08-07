@@ -16,6 +16,10 @@ criteria:
     - Grottes
     - Petit-Saconnex
     - Charmilles
+  # Liste vide = tous les types acceptés (Dépôt, Arcade, Atelier,
+  # Industriel, Bureau, Local commercial — voir utils/parser.PROPERTY_TYPES).
+  # Modifiable depuis docs/criteria.html sans toucher ce fichier.
+  allowed_property_types: []
   require_possible_changing_rooms: true
   changing_room_keywords:
     - vestiaire

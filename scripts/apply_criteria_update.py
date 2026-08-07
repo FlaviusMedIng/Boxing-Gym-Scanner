@@ -17,6 +17,7 @@ from pathlib import Path
 import yaml
 
 from utils.parser import DISTRICTS as KNOWN_DISTRICTS
+from utils.parser import PROPERTY_TYPES as KNOWN_PROPERTY_TYPES
 
 CONFIG_PATH = Path("config.yaml")
 
@@ -24,7 +25,9 @@ CONFIG_PATH = Path("config.yaml")
 def parse_issue_body(body: str) -> dict:
     fields = {}
     for line in body.splitlines():
-        m = re.match(r"^\s*(surface_min|loyer_max|quartiers|vestiaires_requis)\s*:\s*(.+?)\s*$", line)
+        # "types" peut être vide (tous les types acceptés) : (.*) plutôt que
+        # (.+?) pour capturer une chaîne vide sans que la ligne soit ignorée.
+        m = re.match(r"^\s*(surface_min|loyer_max|quartiers|types|vestiaires_requis)\s*:\s*(.*?)\s*$", line)
         if m:
             fields[m.group(1)] = m.group(2)
     return fields
@@ -47,12 +50,18 @@ def validate(fields: dict) -> dict:
     if not districts:
         raise ValueError("Aucun quartier valide dans la demande")
 
+    # Contrairement aux quartiers, une liste de types vide est valide (=
+    # tous les types de bien acceptés) : pas de vérification "non vide" ici.
+    property_types = [t.strip() for t in fields.get("types", "").split(",") if t.strip()]
+    property_types = [t for t in property_types if t in KNOWN_PROPERTY_TYPES]
+
     changing_room = fields.get("vestiaires_requis", "oui").strip().lower() == "oui"
 
     return {
         "min_surface_m2": surface,
         "max_rent_chf_month": rent,
         "allowed_districts": districts,
+        "allowed_property_types": property_types,
         "require_possible_changing_rooms": changing_room,
     }
 
@@ -84,6 +93,18 @@ def apply_to_config_text(text: str, values: dict) -> str:
         text,
         count=1,
     )
+
+    # allowed_property_types est représenté en style "flow" ([a, b] ou [])
+    # plutôt qu'en liste bloc comme allowed_districts, précisément parce
+    # qu'il est fréquemment vide — substituer une ligne entière est plus
+    # simple et plus sûr que remplacer "au moins un élément existant".
+    new_types_flow = "[" + ", ".join(values["allowed_property_types"]) + "]"
+    text = re.sub(
+        r"(?m)^(\s*allowed_property_types:\s*)\[.*\]",
+        lambda m: f"{m.group(1)}{new_types_flow}",
+        text,
+        count=1,
+    )
     return text
 
 
@@ -106,6 +127,7 @@ def main() -> int:
     assert criteria.get("min_surface_m2") == values["min_surface_m2"]
     assert criteria.get("max_rent_chf_month") == values["max_rent_chf_month"]
     assert criteria.get("allowed_districts") == values["allowed_districts"]
+    assert criteria.get("allowed_property_types") == values["allowed_property_types"]
     assert criteria.get("require_possible_changing_rooms") == values["require_possible_changing_rooms"]
 
     if updated == original:

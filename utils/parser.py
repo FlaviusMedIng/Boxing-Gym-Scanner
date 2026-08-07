@@ -223,3 +223,27 @@ def detect_district(text: str | None) -> str | None:
 def extract_possible_changing_room(text: str | None, keywords: list[str]) -> bool:
     t = normalize(text)
     return any(normalize(word) in t for word in keywords)
+
+# Types de biens couramment distingués sur les sites sources (titres du
+# type "Arcade 12 m2", "Dépôt 13m2 Servette", "Bureaux 58 m2"...). Ordre du
+# plus spécifique au plus générique : un titre contenant "dépôt" ne doit pas
+# être classé "Local commercial" juste parce que ce dernier mot apparaît
+# aussi ailleurs dans le texte.
+PROPERTY_TYPES = ["Dépôt", "Arcade", "Atelier", "Industriel", "Bureau", "Local commercial"]
+
+_PROPERTY_TYPE_KEYWORDS = {
+    "Dépôt": ["depot", "dépôt", "entrepot", "entrepôt"],
+    "Arcade": ["arcade"],
+    "Atelier": ["atelier"],
+    "Industriel": ["industriel"],
+    "Bureau": ["bureau"],
+    "Local commercial": ["local commercial", "commerce", "commercial"],
+}
+
+
+def detect_property_type(text: str | None) -> str | None:
+    t = normalize(text)
+    for label in PROPERTY_TYPES:
+        if any(normalize(kw) in t for kw in _PROPERTY_TYPE_KEYWORDS[label]):
+            return label
+    return None

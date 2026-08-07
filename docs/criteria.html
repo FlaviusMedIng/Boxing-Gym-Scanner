@@ -60,7 +60,7 @@
       </div>
       <div class="field">
         <label class="title" for="rent">Loyer maximum (CHF/mois)</label>
-        <input type="number" id="rent" min="1" step="50" value="10000" required>
+        <input type="number" id="rent" min="1" step="50" value="3001" required>
       </div>
       <div class="field">
         <div class="title">Quartiers acceptés</div>
@@ -90,11 +90,11 @@
         Jonction
       </label>
       <label class="chk">
-        <input type="checkbox" name="district" value="Carouge" >
+        <input type="checkbox" name="district" value="Carouge" checked>
         Carouge
       </label>
       <label class="chk">
-        <input type="checkbox" name="district" value="Acacias" >
+        <input type="checkbox" name="district" value="Acacias" checked>
         Acacias
       </label>
       <label class="chk">
@@ -120,6 +120,35 @@
       <label class="chk">
         <input type="checkbox" name="district" value="Charmilles" checked>
         Charmilles
+      </label>
+        </div>
+      </div>
+      <div class="field">
+        <div class="title">Type de bien (aucune case cochée = tous les types acceptés)</div>
+        <div class="districts">
+      <label class="chk">
+        <input type="checkbox" name="property_type" value="Dépôt" >
+        Dépôt
+      </label>
+      <label class="chk">
+        <input type="checkbox" name="property_type" value="Arcade" >
+        Arcade
+      </label>
+      <label class="chk">
+        <input type="checkbox" name="property_type" value="Atelier" >
+        Atelier
+      </label>
+      <label class="chk">
+        <input type="checkbox" name="property_type" value="Industriel" >
+        Industriel
+      </label>
+      <label class="chk">
+        <input type="checkbox" name="property_type" value="Bureau" >
+        Bureau
+      </label>
+      <label class="chk">
+        <input type="checkbox" name="property_type" value="Local commercial" >
+        Local commercial
       </label>
         </div>
       </div>
@@ -158,11 +187,13 @@ document.getElementById('f').addEventListener('submit', async (e) => {
   statusEl.textContent = 'Envoi en cours...';
 
   const districts = [...document.querySelectorAll('input[name="district"]:checked')].map(el => el.value);
+  const propertyTypes = [...document.querySelectorAll('input[name="property_type"]:checked')].map(el => el.value);
   const payload = {
     key,
     min_surface_m2: Number(document.getElementById('surface').value),
     max_rent_chf_month: Number(document.getElementById('rent').value),
     allowed_districts: districts,
+    allowed_property_types: propertyTypes,
     require_possible_changing_rooms: document.getElementById('changing-room').checked,
   };
 
