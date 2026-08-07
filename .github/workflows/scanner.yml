@@ -5,6 +5,14 @@ on:
     - cron: '0 */3 * * *'
 permissions:
   contents: write
+# Sans ça, un déclenchement manuel qui chevauche le cron programmé fait
+# courir deux runs en parallèle qui poussent tous les deux sur main — l'un
+# des deux perd la course et son "git push" échoue (vécu le 2026-08-07).
+# Les runs qui se chevauchent sont mis en file plutôt qu'exécutés en même
+# temps ; queued (pas cancel-in-progress) pour ne perdre aucun scan.
+concurrency:
+  group: geneva-gym-scanner
+  cancel-in-progress: false
 jobs:
   run-scanner:
     runs-on: ubuntu-latest
