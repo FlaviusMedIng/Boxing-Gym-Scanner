@@ -7,6 +7,11 @@ class MoserVernetScraper(BaseScraper):
     name = "moservernet"
 
     use_playwright = True
+    # La page a une activité réseau continue (carousels, favoris) qui
+    # n'atteint jamais l'état "idle" — "networkidle" (le défaut) provoque un
+    # timeout systématique à 90s. Les annonces sont déjà dans le HTML rendu
+    # côté serveur, donc "domcontentloaded" suffit et est bien plus fiable.
+    load_strategy = "domcontentloaded"
 
     urls = [
         "https://www.moservernet.ch/louer/arcades-geneve_ateliers-geneve_bureaux-geneve_surfaces-commerciales-geneve/"
