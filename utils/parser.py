@@ -5,6 +5,10 @@ import unicodedata
 DISTRICTS = [
     "Champel", "Eaux-Vives", "Rive", "Rives",
     "Plainpalais", "Jonction", "Carouge", "Acacias",
+    # Ajoutés le 2026-08-07 pour élargir le périmètre de recherche (gare
+    # Cornavin et quartiers centraux voisins) : le père du user filtre
+    # ensuite lui-même via le site (dropdown quartier) ou docs/criteria.html.
+    "Cornavin", "Pâquis", "Servette", "Grottes", "Petit-Saconnex", "Charmilles",
 ]
 
 # NPA (codes postaux) de la Ville de Genève vers quartier. Beaucoup d'annonces
@@ -12,6 +16,7 @@ DISTRICTS = [
 # en toutes lettres, ce qui les faisait passer à travers le filtre par quartier.
 # Mapping volontairement restreint aux NPA sans ambiguïté raisonnable.
 NPA_TO_DISTRICT = {
+    "1201": "Cornavin",
     "1205": "Plainpalais",
     "1206": "Champel",
     "1207": "Eaux-Vives",
@@ -99,6 +104,26 @@ def parse_price_chf_month(text: str | None) -> int | None:
 
     return None
 
+def parse_price_m2_month(text: str | None) -> float | None:
+    """Extrait CHF/m²/mois depuis le texte (fréquent pour les arcades/dépôts,
+    distinct de CHF/m²/an — voir compute_monthly_rent)."""
+    if not text:
+        return None
+    t = normalize(text)
+    cents = r"(?:[.\-–]{1,3})?"
+    patterns = [
+        rf"chf\s*([\d'’\s]+){cents}\s*/?\s*m\s*[²2²]\s*/?\s*(?:mois|month|mo\.?)",
+        rf"([\d'’\s]+)\s*chf\s*/?\s*m\s*[²2²]\s*/?\s*(?:mois|month)",
+        rf"([\d'’\s]+)\s*/?\s*m\s*[²2²]\s*/?\s*(?:mois|month)",
+    ]
+    for pat in patterns:
+        m = re.search(pat, t)
+        if m:
+            val = _extract_number(m.group(1))
+            if val and 5 <= val <= 500:
+                return float(val)
+    return None
+
 def parse_price_m2_year(text: str | None) -> float | None:
     """Extrait CHF/m²/an depuis le texte."""
     if not text:
@@ -134,7 +159,7 @@ def parse_price_year(text: str | None) -> int | None:
 def compute_monthly_rent(text: str | None, surface_m2: float | None = None) -> int | None:
     """
     Retourne le loyer mensuel en CHF, en normalisant depuis n'importe quelle unité.
-    Priorité: CHF/mois > CHF/an /12 > CHF/m²/an * surface /12
+    Priorité: CHF/mois > CHF/m²/mois * surface > CHF/an /12 > CHF/m²/an * surface /12
     """
     if not text:
         return None
@@ -144,12 +169,17 @@ def compute_monthly_rent(text: str | None, surface_m2: float | None = None) -> i
     if monthly:
         return monthly
 
-    # 2. CHF/an → /12
+    # 2. CHF/m²/mois * surface (courant pour arcades/dépôts)
+    m2_month = parse_price_m2_month(text)
+    if m2_month and surface_m2:
+        return int(m2_month * surface_m2)
+
+    # 3. CHF/an → /12
     yearly = parse_price_year(text)
     if yearly:
         return yearly // 12
 
-    # 3. CHF/m²/an * surface / 12
+    # 4. CHF/m²/an * surface / 12
     m2_year = parse_price_m2_year(text)
     if m2_year and surface_m2:
         return int((m2_year * surface_m2) / 12)

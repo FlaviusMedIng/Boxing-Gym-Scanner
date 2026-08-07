@@ -7,10 +7,11 @@ from scoring.gym_score import compute_score
 from scrapers import build_scrapers
 from storage.database import Database
 from storage.excel_export import export_all
-from storage.site_generator import generate_site
+from storage.site_generator import generate_site, generate_criteria_page
 from utils.config import load_config
 from utils.logger import get_logger
 import hashlib
+import os
 
 def make_id(listing: dict) -> str:
     """Génère un ID stable basé sur l'URL."""
@@ -81,6 +82,14 @@ def main() -> int:
     site_path = config["output"].get("site_path", "docs/index.html")
     generate_site(db, config, site_path)
 
+    criteria_page_path = config["output"].get("criteria_page_path", "docs/criteria.html")
+    worker_url = config["output"].get("criteria_worker_url", "")
+    generate_criteria_page(config, criteria_page_path, worker_url)
+
+    site_url = (config["output"].get("site_url") or "").rstrip("/")
+    edit_token = os.getenv("CRITERIA_EDIT_TOKEN", "")
+    criteria_url = f"{site_url}/criteria.html?key={edit_token}" if edit_token else f"{site_url}/criteria.html"
+
     logger.info(
         "Run complete. Total scraped=%s | processed=%s | new=%s | changed=%s",
         len(all_raw), len(processed), len(new_listings), len(changed_listings)
@@ -100,12 +109,29 @@ def main() -> int:
 
     joined_message = "\n\n---\n\n".join(messages).strip()
     if joined_message:
+        if site_url:
+            links_footer = (
+                f"\n\n---\n\nVoir toutes les annonces: {site_url}/"
+                f"\nModifier les criteres de recherche: {criteria_url}"
+            )
+        else:
+            links_footer = ""
+
         if config["notifications"].get("telegram_enabled", False):
-            send_telegram(joined_message, logger)
+            # Le message Telegram est limité à 4000 caractères (voir
+            # send_telegram) : on tronque la partie annonces pour garder les
+            # liens intacts plutôt que de risquer de les couper.
+            max_listings_len = 4000 - len(links_footer)
+            telegram_message = joined_message[:max_listings_len] + links_footer
+            send_telegram(telegram_message, logger)
         if config["notifications"].get("email_enabled", False):
             send_email(
                 subject="Geneva Gym Scanner - nouvelles annonces",
-                body=joined_message + "\n\nLe site complet (toutes les annonces, avec filtres) est joint à cet email.",
+                body=(
+                    joined_message
+                    + "\n\nLe site complet (toutes les annonces, avec filtres) est joint à cet email."
+                    + links_footer
+                ),
                 logger=logger,
                 attachment_path=site_path,
             )

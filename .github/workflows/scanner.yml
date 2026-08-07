@@ -32,6 +32,7 @@ jobs:
           EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          CRITERIA_EDIT_TOKEN: ${{ secrets.CRITERIA_EDIT_TOKEN }}
         run: |
           python main.py
 
@@ -46,13 +47,14 @@ jobs:
             data/listings.db
             data/scanner.log
             docs/index.html
+            docs/criteria.html
           if-no-files-found: warn
 
       - name: Commit updated data back to repository
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/listings.db data/listings.xlsx data/listings.csv data/scanner.log docs/index.html || true
+          git add data/listings.db data/listings.xlsx data/listings.csv data/scanner.log docs/index.html docs/criteria.html || true
           git diff --cached --quiet && exit 0
           git commit -m "Update scanner data [skip ci]"
           git push

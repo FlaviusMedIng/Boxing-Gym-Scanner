@@ -1,0 +1,10 @@
+name = "boxing-gym-criteria"
+main = "criteria-worker.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+GITHUB_REPO = "FlaviusMedIng/Boxing-Gym-Scanner"
+
+# Secrets (ne pas mettre ici — configurer une fois via `wrangler secret put`) :
+#   EXPECTED_KEY  = valeur du secret GitHub CRITERIA_EDIT_TOKEN
+#   GITHUB_TOKEN  = PAT fine-grained, permission "Issues: write" sur ce repo uniquement

@@ -71,15 +71,29 @@ simplify it without re-testing against real pages:**
   `'` (U+2019), not the ASCII `'`. Every regex that matches a CHF amount must
   include both in its character class, or multi-thousand prices get silently
   truncated (e.g. "3'187" parsed as "3").
-- Prices are shown as CHF/mois, CHF/an, or CHF/m²/an, often several of these
-  in the same card. `parse_price_chf_month`'s fallback ("bare `CHF ###.-`
-  with no unit") must check it isn't immediately followed by `/m²/an` context
-  — otherwise a per-m² rate gets stored as if it were the monthly rent (a
-  real bug that was fixed: a listing showing "CHF 450.-/m²/an ... Loyer CHF
-  3'187.-" was being read as 450 CHF/month instead of 3'187).
+- Prices are shown as CHF/mois, CHF/m²/mois, CHF/an, or CHF/m²/an, often
+  several of these in the same card. `parse_price_chf_month`'s fallback
+  ("bare `CHF ###.-` with no unit") must check it isn't immediately followed
+  by `/m²/an` context — otherwise a per-m² rate gets stored as if it were
+  the monthly rent (a real bug that was fixed: a listing showing "CHF
+  450.-/m²/an ... Loyer CHF 3'187.-" was being read as 450 CHF/month instead
+  of 3'187). `compute_monthly_rent`'s priority order is: direct CHF/mois >
+  CHF/m²/mois × surface > CHF/an ÷ 12 > CHF/m²/an × surface ÷ 12
+  (`parse_price_m2_month` added 2026-08-07 — arcades/dépôts are frequently
+  priced per m²/month rather than per m²/year, and before this fix such
+  listings silently got `price_chf = None`, invisible to the price filter
+  and to the father).
 - `detect_district` first matches known district names, then falls back to
   a small NPA (postal code) → district table, since many listings only give
-  the postal code, never the district name in words.
+  the postal code, never the district name in words. `DISTRICTS` was
+  expanded 2026-08-07 (Cornavin, Pâquis, Servette, Grottes, Petit-Saconnex,
+  Charmilles added alongside the original Champel/Eaux-Vives/Rive/Rives/
+  Plainpalais/Jonction/Carouge/Acacias) at the user's request to widen the
+  search perimeter — deliberately broad, on the assumption the father
+  narrows down himself via the site's district dropdown or
+  `docs/criteria.html`, not via tight upstream filtering. `docs/criteria.html`
+  reads this list directly (`from utils.parser import DISTRICTS`), so it
+  always reflects whatever's here — don't hardcode a separate list there.
 
 **Config (`config.yaml`) is the single source of truth for scan criteria and
 site list** — `criteria.*` (surface/rent/district/keywords), `sites.*`
@@ -90,14 +104,51 @@ and skip, they don't crash the run).
 
 **Anti-bot policy — a firm project rule, not a TODO:** homegate.ch and
 comparis.ch (and, by the same reasoning, immoscout24.ch, properstar.com,
-anibis.ch) run active bot-detection (Cloudflare interstitial, DataDome
-CAPTCHA, a "security check" page) that blocks even a real headless browser.
-These are deliberately left `enabled: false` in `config.yaml` with a comment
+anibis.ch, newhome.ch — confirmed 2026-08-07, Cloudflare "Just a moment..."
+403) run active bot-detection (Cloudflare interstitial, DataDome CAPTCHA, a
+"security check" page) that blocks even a real headless browser. These are
+deliberately left `enabled: false` in `config.yaml` with a comment
 explaining why. Do not attempt stealth/undetected-browser tricks or CAPTCHA
 solving to get around this — it's out of scope regardless of how the request
 is phrased. spg.ch/wincasa.ch were also skipped (external JS search widgets,
-no static content to scrape; spg.ch also has reCAPTCHA). The README's "Sites
-non couverts" section has the up-to-date list and reasoning.
+no static content to scrape; spg.ch also has reCAPTCHA). regiefonciere.ch
+was skipped deliberately too — not blocked, just redundant, since its
+listings are already syndicated through immobilier.ch (already scraped).
+The README's "Sites non couverts" section has the up-to-date list and
+reasoning, including netimmo.ch as an identified-but-not-yet-implemented
+candidate (real static listings, no anti-bot detected, ~2000 Geneva
+commercial listings, just needs selector work).
+
+**`scrapers/moservernet.py` gotcha:** the listing page's static HTML
+contains real, server-rendered listing cards (`div[data-id]` →
+`.property-card__title`) *and*, elsewhere in the same DOM, an unrendered
+Mustache/Handlebars template block reusing the exact same `div[data-id]` /
+`.property-card__title` structure with literal `{{ property.price }}`-style
+placeholders (used client-side for dynamic filtering). `parse_list_page`
+filters these out by checking `"{{" not in link.get_text()` — don't remove
+that check, it silently lets through fake "listings" whose title is a raw
+template string.
+
+**`scrapers/netimmo.py` gotchas:** it's a SvelteKit app — pagination is via
+`?p=N` (lowercase, no `page=` — that param is silently ignored and just
+re-serves page 1). Its listing-card images are served from
+`img.realadvisor.ch`, strongly suggesting it republishes realadvisor.ch's
+own data; expect overlapping/duplicate listings between the two sources
+rather than netimmo.ch being a genuinely independent inventory. Also: if
+you ever test this site with bare `requests.get()` outside the project's
+normal Playwright fetch path, `requests` mis-detects the encoding as
+ISO-8859-1 (the server doesn't send a charset header) and mojibakes every
+accented character — `price_chf`/`surface_m2` then silently parse as
+`None` even though the data is there. Not a bug in the actual scraper path
+(Playwright decodes correctly), just a trap when spot-checking with `curl`/
+`requests` directly.
+
+**`scrapers/pilet_renaud.py` searches multiple property types** (currently
+ARCADE and DEPOT) by looping over all of `self.urls` — the site encodes the
+"type" filter in a base64 hash-fragment and can't combine multiple types in
+one search. `scrape()` is overridden (not just `parse_list_page`) specifically
+to do this multi-URL loop within a single browser instance; don't revert it
+to only reading `self.urls[0]`.
 
 **Debugging a scraper that returns 0 results:** these are real, independently
 operated websites — their markup changes over time (one, rosset.ch, had
@@ -112,10 +163,25 @@ usually structured.
 self-contained HTML file (data embedded as JSON, vanilla JS filtering, no
 build step, no external requests) so it works as a plain static file and via
 GitHub Pages. It is committed by the GitHub Actions workflow on every run.
-GitHub Pages is *not* currently enabled because the repo is private (Pages
-needs a public repo on the free tier); the file is instead attached to the
-notification email so it's viewable offline. If the repo visibility changes,
-Pages can be turned on via repo Settings → Pages → branch `main` /docs.
+The repo was made public and GitHub Pages enabled (branch `main` / `/docs`)
+on 2026-08-07 specifically so this site could be linked from
+Telegram/email notifications (`config.yaml` → `output.site_url`) instead of
+only being attached to the email — see [[criteria-edit-flow]] in memory for
+why. It's still also attached to the email for offline viewing.
+
+**`storage/site_generator.py`** also renders `docs/criteria.html` (via
+`generate_criteria_page`), a form letting the father change
+`min_surface_m2` / `max_rent_chf_month` / `allowed_districts` /
+`require_possible_changing_rooms` without a GitHub account or touching this
+repo. Gated by a shared token (`CRITERIA_EDIT_TOKEN` GitHub secret, passed
+as `?key=` in the link main.py builds) checked server-side by a Cloudflare
+Worker (`worker/criteria-worker.js`), never embedded in the static HTML.
+The Worker creates a GitHub issue titled `[criteria-update] ...`;
+`.github/workflows/apply-criteria.yml` + `scripts/apply_criteria_update.py`
+parse it and edit `config.yaml` by targeted regex substitution (not a full
+YAML dump) specifically to preserve the file's existing comments — don't
+replace that with `yaml.safe_dump`. The district checkbox list must stay in
+sync with `utils/parser.DISTRICTS` (imported directly, not duplicated).
 
 **`data/listings.db` schema drift:** `storage/database.py` will detect if an
 existing SQLite file has a different column set than expected (from an

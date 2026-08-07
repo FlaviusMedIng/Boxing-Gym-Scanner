@@ -1,0 +1,52 @@
+name: apply-criteria-update
+on:
+  issues:
+    types: [opened]
+permissions:
+  contents: write
+  issues: write
+jobs:
+  apply:
+    if: startsWith(github.event.issue.title, '[criteria-update]')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Apply criteria from issue
+        id: apply
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: python scripts/apply_criteria_update.py
+
+      - name: Commit and push config.yaml
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add config.yaml
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update search criteria from issue #${{ github.event.issue.number }}"
+            git push
+          fi
+
+      - name: Comment and close issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ steps.apply.outcome }}" = "success" ]; then
+            gh issue comment ${{ github.event.issue.number }} --body "Critères mis à jour. Ils seront appliqués au prochain scan (toutes les 3h)."
+            gh issue close ${{ github.event.issue.number }}
+          else
+            gh issue comment ${{ github.event.issue.number }} --body "La demande n'a pas pu être appliquée (valeurs invalides). Réessaie depuis le formulaire."
+          fi

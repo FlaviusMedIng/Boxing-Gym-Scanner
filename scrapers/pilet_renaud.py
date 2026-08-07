@@ -13,9 +13,10 @@ class PiletRenaudScraper(BaseScraper):
     _EXCLUDED = ["/estimer", "/contact", "/vendre", "/acheter", "/accueil/search$"]
 
     def scrape(self) -> list[dict]:
-        url = self.urls[0] if self.urls else \
-            "https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent"
-        self.logger.info(f"[pilet_renaud] Playwright → {url}")
+        urls = self.urls or ["https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent"]
+
+        listings: list[dict] = []
+        seen_urls: set[str] = set()
 
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
@@ -27,15 +28,28 @@ class PiletRenaudScraper(BaseScraper):
             page = context.new_page()
             page.route("**/*.{png,jpg,jpeg,gif,svg,woff,woff2,ttf}",
                        lambda r: r.abort())
-            page.goto(url, wait_until="domcontentloaded", timeout=60000)
-            time.sleep(5)
-            html = page.content()
+
+            # Chaque URL correspond à un type de bien différent (le filtre
+            # "type" du site est encodé dans le hash-fragment, ex: ARCADE,
+            # DEPOT). Le site ne permet pas de combiner plusieurs types dans
+            # une seule recherche, donc on parcourt les URLs une par une.
+            for url in urls:
+                self.logger.info(f"[pilet_renaud] Playwright → {url}")
+                page.goto(url, wait_until="domcontentloaded", timeout=60000)
+                time.sleep(5)
+                html = page.content()
+
+                soup = BeautifulSoup(html, "html.parser")
+                results = self.parse_list_page(soup, url)
+                new_results = [r for r in results if r.get("url") not in seen_urls]
+                seen_urls.update(r.get("url") for r in new_results)
+                listings.extend(new_results)
+                self.logger.info(f"[pilet_renaud] {url}: {len(new_results)} annonces")
+
             browser.close()
 
-        soup = BeautifulSoup(html, "html.parser")
-        results = self.parse_list_page(soup, url)
-        self.logger.info(f"[pilet_renaud] {len(results)} annonces trouvées")
-        return results
+        self.logger.info(f"[pilet_renaud] {len(listings)} annonces trouvées au total")
+        return listings
 
     def parse_list_page(self, soup, base_url) -> list[dict]:
         listings = []

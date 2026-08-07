@@ -8,6 +8,12 @@ criteria:
     - Rives
     - Plainpalais
     - Jonction
+    - Cornavin
+    - Pâquis
+    - Servette
+    - Grottes
+    - Petit-Saconnex
+    - Charmilles
   require_possible_changing_rooms: true
   changing_room_keywords:
     - vestiaire
@@ -60,8 +66,15 @@ sites:
 
   pilet_renaud:
     enabled: true
+    # Le filtre "type" du site est encodé dans le hash-fragment (base64 de
+    # "transaction=rent&type=...&room_min=1&room_max=12&price_max=850000
+    # &price_min=10000&surface_min=5&surface_max=1500&order_by=asc") et ne
+    # peut pas combiner plusieurs types en une seule recherche : une URL par
+    # type de bien pertinent (ARCADE, DEPOT — valeurs trouvées dans le
+    # formulaire de filtre du site).
     start_urls:
       - "https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent#dHJhbnNhY3Rpb249cmVudCZ0eXBlPUFSQ0FERSZyb29tX21pbj0xJnJvb21fbWF4PTEyJnByaWNlX21heD04NTAwMDAmcHJpY2VfbWluPTEwMDAwJnN1cmZhY2VfbWluPTUmc3VyZmFjZV9tYXg9MTUwMCZvcmRlcl9ieT1hc2M="
+      - "https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent#dHJhbnNhY3Rpb249cmVudCZ0eXBlPURFUE9UJnJvb21fbWluPTEmcm9vbV9tYXg9MTImcHJpY2VfbWF4PTg1MDAwMCZwcmljZV9taW49MTAwMDAmc3VyZmFjZV9taW49NSZzdXJmYWNlX21heD0xNTAwJm9yZGVyX2J5PWFzYw=="
     max_pages: 1
 
   immobilier_ch:
@@ -78,8 +91,30 @@ sites:
 
   naef:
     enabled: true
+    # naef.ch a des catégories distinctes "surface-commerciales" et "depots" ;
+    # les deux sont pertinentes (arcade/bureau vs dépôt/stockage).
     start_urls:
       - "https://www.naef.ch/louer/surface-commerciales/geneve/geneve-ville/?sortingField=prix_desc&zoom=8"
+      - "https://www.naef.ch/louer/depots/geneve/geneve-ville/?sortingField=prix_desc&zoom=8"
+    max_pages: 1
+
+  netimmo:
+    # Portail agrégateur (image CDN partagé avec realadvisor.ch — probablement
+    # la même source de données) : chevauchement significatif avec le
+    # scraper realadvisor déjà actif. Gardé activé quand même (demandé
+    # explicitement) — désactiver si les doublons gênent plus qu'ils n'aident.
+    enabled: true
+    start_urls:
+      - "https://www.netimmo.ch/local-commercial-a-louer-ville-geneve"
+    max_pages: 4
+
+  moservernet:
+    enabled: true
+    # "depots-geneve" est une catégorie distincte sur ce site, absente du
+    # slug combiné arcades/ateliers/bureaux/surfaces-commerciales.
+    start_urls:
+      - "https://www.moservernet.ch/louer/arcades-geneve_ateliers-geneve_bureaux-geneve_surfaces-commerciales-geneve/"
+      - "https://www.moservernet.ch/louer/depots-geneve/"
     max_pages: 1
 
 output:
@@ -89,6 +124,19 @@ output:
   log_path: "data/scanner.log"
   # Page statique publiée gratuitement via GitHub Pages (dossier /docs)
   site_path: "docs/index.html"
+  # URL publique GitHub Pages du site (repo public depuis le 2026-08-07),
+  # utilisée dans les notifications Telegram/email.
+  site_url: "https://flaviusmeding.github.io/Boxing-Gym-Scanner/"
+  # Page de formulaire permettant de modifier les critères (min_surface_m2,
+  # max_rent_chf_month, allowed_districts, require_possible_changing_rooms)
+  # sans compte GitHub ni édition manuelle de ce fichier. Générée à côté de
+  # index.html.
+  criteria_page_path: "docs/criteria.html"
+  # URL du Cloudflare Worker qui reçoit la soumission du formulaire et crée
+  # une issue GitHub (voir worker/criteria-worker.js et README). À renseigner
+  # après le déploiement du Worker — laisser vide désactive juste le bouton
+  # "Envoyer" côté page (affiche un message d'erreur clair).
+  criteria_worker_url: "https://boxing-gym-criteria.boxinggym-tracker.workers.dev"
 
 runtime:
   request_timeout_seconds: 90

@@ -3,7 +3,11 @@
 Scanner gratuit hébergé sur GitHub Actions pour repérer des locaux commerciaux à louer à Genève pouvant convenir à une salle de sport.
 
 ## Fonctionnalités
-- scrape plusieurs sites immobiliers (realadvisor.ch, rosset.ch, pilet-renaud.ch, immobilier.ch, acheter-louer.ch, naef.ch)
+- scrape plusieurs sites immobiliers (realadvisor.ch, rosset.ch, pilet-renaud.ch,
+  immobilier.ch, acheter-louer.ch, naef.ch, moservernet.ch, netimmo.ch), avec
+  une couverture explicite des arcades ET des dépôts (naef, moservernet,
+  pilet-renaud ont chacun une catégorie dépôt séparée en plus de leur
+  catégorie commerciale/bureaux)
 - filtre selon surface, loyer, quartier, vestiaires potentiels
 - stocke l'historique dans SQLite
 - exporte Excel et CSV
@@ -13,32 +17,90 @@ Scanner gratuit hébergé sur GitHub Actions pour repérer des locaux commerciau
 - dashboard Streamlit local
 - **site web statique** (`docs/index.html`) listant toutes les annonces et
   celles qui correspondent aux critères, avec lien direct vers chaque
-  annonce — généré à chaque run, publiable gratuitement via GitHub Pages
+  annonce — généré à chaque run, publié gratuitement via GitHub Pages à
+  <https://flaviusmeding.github.io/Boxing-Gym-Scanner/>, et lié depuis les
+  notifications Telegram/email
+- **modification des critères depuis le site** (`docs/criteria.html`), sans
+  compte GitHub — voir "Modifier les critères depuis le site" ci-dessous
 
-## Publier le site de résultats (GitHub Pages, gratuit)
-Une fois le dépôt poussé sur GitHub, à faire une seule fois :
-1. Settings → Pages
-2. Source : "Deploy from a branch"
-3. Branch : `main`, dossier `/docs`
-4. Enregistrer
+## Site de résultats (GitHub Pages, gratuit)
+Le dépôt est public et GitHub Pages est activé (Settings → Pages, source
+`main` / dossier `/docs`) — c'était une condition nécessaire pour que le
+site soit accessible depuis un lien dans les emails/Telegram (avant, il
+n'était que joint en pièce jointe à l'email). Le site se met à jour tout
+seul à chaque exécution du scanner : le workflow commite `docs/index.html`
+avec le reste des données.
 
-Le site sera disponible à `https://<votre-compte>.github.io/<nom-du-repo>/`
-et se mettra à jour tout seul à chaque exécution du scanner (le workflow
-commite `docs/index.html` avec le reste des données).
+URL : <https://flaviusmeding.github.io/Boxing-Gym-Scanner/>
+
+## Modifier les critères depuis le site
+`docs/criteria.html` permet de changer la surface minimum, le loyer
+maximum, les quartiers acceptés et l'exigence de vestiaires, sans compte
+GitHub ni édition manuelle de `config.yaml`. Le lien (avec la clé d'accès)
+est ajouté automatiquement à la fin de chaque notification Telegram/email.
+
+Flux complet :
+1. La page envoie le formulaire à un **Cloudflare Worker** (`worker/`).
+2. Le Worker vérifie la clé d'accès, puis crée une **issue GitHub** avec les
+   valeurs demandées (le Worker est le seul endroit qui détient un token
+   GitHub capable d'écrire sur le repo — jamais exposé côté client).
+3. La GitHub Action `.github/workflows/apply-criteria.yml` lit l'issue,
+   met à jour `config.yaml` (`scripts/apply_criteria_update.py`), commite,
+   puis ferme l'issue avec un message de confirmation.
+4. Le prochain scan (au plus tard dans 3h) utilise les nouveaux critères.
+
+**Mise en place (une seule fois)** — le code est déjà en place, il reste à
+déployer le Worker :
+1. Créer un compte Cloudflare gratuit (workers.dev) si besoin.
+2. Créer un **PAT GitHub fine-grained** (Settings → Developer settings →
+   Fine-grained tokens) limité à ce repo, permission **Issues: Read and
+   write** uniquement — pas plus.
+3. Depuis `worker/` : `npx wrangler login`, puis
+   `npx wrangler secret put GITHUB_TOKEN` (coller le PAT) et
+   `npx wrangler secret put EXPECTED_KEY` (coller la valeur du secret
+   GitHub `CRITERIA_EDIT_TOKEN`, voir section secrets ci-dessous).
+4. `npx wrangler deploy` → note l'URL `https://boxing-gym-criteria.<ton-compte>.workers.dev`.
+5. Mettre cette URL dans `config.yaml` → `output.criteria_worker_url`,
+   commit/push. Elle sera embarquée dans `docs/criteria.html` au prochain
+   run.
 
 ## Sites non couverts
-- **homegate.ch, comparis.ch** (et par extension immoscout24.ch,
-  properstar.com, anibis.ch) : protection anti-bot active (Cloudflare
-  "Just a moment...", CAPTCHA DataDome, page de sécurité), y compris avec un
-  vrai navigateur headless. Contourner ce type de protection n'est pas fait
-  ici. Créez plutôt une alerte email native depuis leur recherche (icône
-  cloche / "créer une alerte") avec les mêmes critères : vous recevrez les
-  nouvelles annonces aussi vite, sans contournement.
+- **homegate.ch, comparis.ch, newhome.ch** (et par extension
+  immoscout24.ch, properstar.com, anibis.ch) : protection anti-bot active
+  (Cloudflare "Just a moment...", CAPTCHA DataDome, page de sécurité), y
+  compris avec un vrai navigateur headless. Contourner ce type de
+  protection n'est pas fait ici. Créez plutôt une alerte email native
+  depuis leur recherche (icône cloche / "créer une alerte") avec les mêmes
+  critères : vous recevrez les nouvelles annonces aussi vite, sans
+  contournement.
 - **spg.ch** : moteur de recherche chargé en JS depuis un widget externe
   (+ reCAPTCHA), pas de contenu statique exploitable simplement.
 - **wincasa.ch** : même situation, widget de recherche externe.
 - **urbanhome.ch** : quasiment aucune offre commerciale (portail surtout
   résidentiel), pas assez de volume pour justifier un scraper dédié.
+- **regiefonciere.ch** (Régie Foncière SA) : pas de scraper dédié — ses
+  annonces sont déjà republiées sur immobilier.ch, qui est déjà couvert.
+- **immostreet.ch** : appartient au même groupe (Swiss Marketplace Group)
+  que homegate.ch/immoscout24.ch, donc probablement protégé par le même
+  système anti-bot — pas testé individuellement, écarté par précaution pour
+  la même raison.
+- **immoadvisor.com** : candidat identifié (2026-08-07), contenu réel
+  détecté (777 mentions "CHF" sur la page de résultats Genève, statut 200),
+  mais pas encore de sélecteur CSS validé — à investiguer si plus de
+  couverture est souhaitée.
+- **Gérance Immobilière Municipale (geneve.ch)** : la Ville de Genève loue
+  elle-même bureaux/arcades/dépôts/ateliers, liste publiée en PDF (pas en
+  HTML scrapable directement) et via un processus de candidature/dépôt de
+  garantie de 6 mois plutôt qu'un contact direct régie — nécessiterait un
+  scraper différent (parsing PDF) et un flux différent pour l'utilisateur.
+  Non implémenté, mentionné ici comme piste.
+
+**netimmo.ch, une réserve :** son CDN d'images (`img.realadvisor.ch`)
+suggère qu'il republie les mêmes données que realadvisor.ch (déjà scrapé) —
+attendez-vous à des doublons entre les deux sources dans les résultats.
+Gardé actif quand même car demandé explicitement ; à désactiver
+(`sites.netimmo.enabled: false`) si les doublons gênent plus qu'ils
+n'aident.
 
 ## Lancement local
 ```bash
@@ -62,3 +124,7 @@ streamlit run dashboard/app.py
 - EMAIL_USERNAME
 - EMAIL_PASSWORD
 - EMAIL_TO
+- CRITERIA_EDIT_TOKEN — clé d'accès à `docs/criteria.html`, embarquée dans le
+  lien des notifications ; doit avoir la même valeur que le secret
+  `EXPECTED_KEY` du Cloudflare Worker (voir "Modifier les critères depuis
+  le site")
