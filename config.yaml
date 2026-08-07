@@ -1,6 +1,6 @@
 criteria:
   min_surface_m2: 50
-  max_rent_chf_month: 3001
+  max_rent_chf_month: 2501
   allowed_districts:
     - Champel
     - Eaux-Vives
@@ -19,7 +19,7 @@ criteria:
   # Liste vide = tous les types acceptés (Dépôt, Arcade, Atelier,
   # Industriel, Bureau, Local commercial — voir utils/parser.PROPERTY_TYPES).
   # Modifiable depuis docs/criteria.html sans toucher ce fichier.
-  allowed_property_types: []
+  allowed_property_types: [Dépôt, Arcade]
   require_possible_changing_rooms: true
   changing_room_keywords:
     - vestiaire
