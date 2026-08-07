@@ -73,8 +73,6 @@ export default {
     const districts = Array.isArray(payload.allowed_districts)
       ? payload.allowed_districts.filter((d) => DISTRICTS.includes(d))
       : [];
-    // Contrairement aux quartiers, une liste vide est une valeur valide ici
-    // (= tous les types de bien acceptés, pas de filtre) : ne pas rejeter.
     const propertyTypes = Array.isArray(payload.allowed_property_types)
       ? payload.allowed_property_types.filter((t) => PROPERTY_TYPES.includes(t))
       : [];
@@ -88,6 +86,9 @@ export default {
     }
     if (districts.length === 0) {
       return jsonResponse({ ok: false, error: "Sélectionne au moins un quartier" }, 400, origin);
+    }
+    if (propertyTypes.length === 0) {
+      return jsonResponse({ ok: false, error: "Sélectionne au moins un type de bien" }, 400, origin);
     }
 
     const body = [

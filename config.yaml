@@ -16,10 +16,17 @@ criteria:
     - Grottes
     - Petit-Saconnex
     - Charmilles
-  # Liste vide = tous les types acceptés (Dépôt, Arcade, Atelier,
-  # Industriel, Bureau, Local commercial — voir utils/parser.PROPERTY_TYPES).
+  # Comme allowed_districts : seuls les types cochés ici sont acceptés (pas
+  # l'inverse). Actuellement les 6 types existants = aucun filtrage effectif
+  # (équivalent à "tout accepté", en attendant que le père restreigne).
   # Modifiable depuis docs/criteria.html sans toucher ce fichier.
-  allowed_property_types: []
+  allowed_property_types:
+    - Dépôt
+    - Arcade
+    - Atelier
+    - Industriel
+    - Bureau
+    - Local commercial
   require_possible_changing_rooms: true
   changing_room_keywords:
     - vestiaire

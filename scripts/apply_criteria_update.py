@@ -50,10 +50,10 @@ def validate(fields: dict) -> dict:
     if not districts:
         raise ValueError("Aucun quartier valide dans la demande")
 
-    # Contrairement aux quartiers, une liste de types vide est valide (=
-    # tous les types de bien acceptés) : pas de vérification "non vide" ici.
     property_types = [t.strip() for t in fields.get("types", "").split(",") if t.strip()]
     property_types = [t for t in property_types if t in KNOWN_PROPERTY_TYPES]
+    if not property_types:
+        raise ValueError("Aucun type de bien valide dans la demande")
 
     changing_room = fields.get("vestiaires_requis", "oui").strip().lower() == "oui"
 
@@ -94,14 +94,10 @@ def apply_to_config_text(text: str, values: dict) -> str:
         count=1,
     )
 
-    # allowed_property_types est représenté en style "flow" ([a, b] ou [])
-    # plutôt qu'en liste bloc comme allowed_districts, précisément parce
-    # qu'il est fréquemment vide — substituer une ligne entière est plus
-    # simple et plus sûr que remplacer "au moins un élément existant".
-    new_types_flow = "[" + ", ".join(values["allowed_property_types"]) + "]"
+    new_type_lines = "".join(f"    - {t}\n" for t in values["allowed_property_types"])
     text = re.sub(
-        r"(?m)^(\s*allowed_property_types:\s*)\[.*\]",
-        lambda m: f"{m.group(1)}{new_types_flow}",
+        r"(  allowed_property_types:\n)(?:    - .*\n)+",
+        lambda m: m.group(1) + new_type_lines,
         text,
         count=1,
     )

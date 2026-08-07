@@ -173,16 +173,19 @@ why. It's still also attached to the email for offline viewing.
 `generate_criteria_page`), a form letting the father change
 `min_surface_m2` / `max_rent_chf_month` / `allowed_districts` /
 `allowed_property_types` / `require_possible_changing_rooms` without a
-GitHub account or touching this repo. `allowed_property_types` is the odd
-one out: an **empty list means "no filter, accept all types"**, not "reject
-everything" — unlike `allowed_districts`, which requires at least one
-selection (the Worker and `apply_criteria_update.py` both enforce this
-asymmetry; don't "fix" it to match districts). It's also stored as a
-flow-style YAML list (`[Dépôt, Arcade]` / `[]`) rather than block-style like
-`allowed_districts`, specifically so the regex substitution in
-`apply_criteria_update.py` can replace a single line unconditionally
-instead of needing "at least one existing item" to match against.
-`property_type` itself comes from `utils.parser.detect_property_type`
+GitHub account or touching this repo. `allowed_property_types` behaves
+exactly like `allowed_districts`: only checked types are accepted, and the
+Worker/`apply_criteria_update.py` both reject a submission with none
+checked — a first version made empty mean "accept all types", which the
+user flagged (2026-08-07) as backwards from normal checkbox semantics, so
+it was reverted to match districts. `config.yaml` therefore always lists
+all `PROPERTY_TYPES` explicitly (not `[]`) to mean "no filtering yet";
+`generate_criteria_page` pre-checks every box when the configured list is
+empty, purely as a defensive default for a hand-edited config, since the
+form itself can no longer produce that state. Both lists are stored
+block-style (`- item` per line) and substituted the same way in
+`apply_criteria_update.py`. `property_type` itself comes from
+`utils.parser.detect_property_type`
 (same per-listing detection pattern as `detect_district`), computed once in
 `BaseScraper.make_listing` and stored as its own SQLite column — matched by
 exact equality in `filters/gym_filter.py`, not substring search like

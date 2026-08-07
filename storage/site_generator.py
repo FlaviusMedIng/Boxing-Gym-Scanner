@@ -313,11 +313,13 @@ def generate_criteria_page(config: dict, output_path: str = "docs/criteria.html"
     """
     criteria = config.get("criteria", {})
     allowed = set(criteria.get("allowed_districts", []))
-    # Liste vide dans config.yaml = tous les types acceptés (comportement
-    # historique, avant l'ajout de ce filtre) — donc rien de coché ne doit
-    # se lire comme "aucun type", pas "tous cochés par défaut" ; on ne
-    # pré-coche que si le père a déjà restreint explicitement la liste.
-    allowed_types = set(criteria.get("allowed_property_types", []))
+    # Comme pour les quartiers : seuls les types cochés sont acceptés. Si
+    # config.yaml a une liste vide (ne devrait plus arriver via ce
+    # formulaire, mais possible après une édition manuelle), tout précocher
+    # plutôt que rien — l'utilisateur doit explicitement décocher pour
+    # restreindre, pas cocher pour élargir depuis un état "tout exclu".
+    configured_types = set(criteria.get("allowed_property_types", []))
+    allowed_types = configured_types if configured_types else set(PROPERTY_TYPES)
 
     district_checkboxes = "\n".join(
         f'''      <label class="chk">
@@ -421,7 +423,7 @@ __DISTRICT_CHECKBOXES__
         </div>
       </div>
       <div class="field">
-        <div class="title">Type de bien (aucune case cochée = tous les types acceptés)</div>
+        <div class="title">Type de bien accepté</div>
         <div class="districts">
 __TYPE_CHECKBOXES__
         </div>
