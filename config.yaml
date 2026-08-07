@@ -1,6 +1,6 @@
 criteria:
-  min_surface_m2: 50
-  max_rent_chf_month: 3001
+  min_surface_m2: 30
+  max_rent_chf_month: 2501
   allowed_districts:
     - Champel
     - Eaux-Vives
