@@ -1,6 +1,6 @@
 criteria:
   min_surface_m2: 50
-  max_rent_chf_month: 10000
+  max_rent_chf_month: 3001
   allowed_districts:
     - Champel
     - Eaux-Vives
@@ -8,6 +8,8 @@ criteria:
     - Rives
     - Plainpalais
     - Jonction
+    - Carouge
+    - Acacias
     - Cornavin
     - Pâquis
     - Servette
