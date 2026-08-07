@@ -30,15 +30,27 @@ sees the website and the notifications.
   [[criteria-edit-flow]]). Before that, the generated site was only
   reachable as an email attachment.
 - **Father-editable criteria.** As of 2026-08-07 the father can change the
-  search criteria (surface, rent ceiling, districts) himself from a page on
-  the public site, without a GitHub account — see [[criteria-edit-flow]]
-  for how that's wired end to end (Cloudflare Worker → GitHub Issue →
-  GitHub Action → `config.yaml`). This was a deliberate choice over having
-  Flavius manually update `config.yaml` every time the father wants to
-  adjust criteria.
+  search criteria (surface, rent ceiling, districts, property type) himself
+  from a page on the public site, without a GitHub account — see
+  [[criteria-edit-flow]] for how that's wired end to end (Cloudflare Worker
+  → GitHub Issue → GitHub Action → `config.yaml`). This was a deliberate
+  choice over having Flavius manually update `config.yaml` every time the
+  father wants to adjust criteria. Fully deployed and confirmed working
+  with real submissions from the father the same day (not just Claude's
+  test traffic) — see [[criteria-edit-flow]] for the live values that
+  resulted (loyer max 2'501 CHF, surface min 30 m², all 14 districts).
+- **Checkbox semantics matter to this user.** The property-type filter
+  originally treated "no boxes checked" as "accept every type" (to avoid
+  breaking existing coverage by default). The father flagged this as
+  backwards the same day he started using the form — he expected unchecked
+  = excluded, like every other checkbox UI. Flipped to match
+  `allowed_districts` (must check at least one). Worth remembering when
+  designing any future checkbox-based filter here: default to conventional
+  checkbox semantics, don't get clever with "empty = permissive" without
+  checking with him first.
 
 ## Related memory
 
-- [[criteria-edit-flow]] — architecture and setup steps for the
-  father-editable criteria feature, including the manual one-time steps
-  (Cloudflare account, GitHub PAT) that aren't stored in this repo.
+- [[criteria-edit-flow]] — architecture, deployment status (live), and the
+  bugs found/fixed while shipping it — useful before touching that flow
+  again.

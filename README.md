@@ -36,10 +36,11 @@ URL : <https://flaviusmeding.github.io/Boxing-Gym-Scanner/>
 ## Modifier les critères depuis le site
 `docs/criteria.html` permet de changer la surface minimum, le loyer
 maximum, les quartiers acceptés, le(s) type(s) de bien (Dépôt, Arcade,
-Atelier, Industriel, Bureau, Local commercial — aucune case cochée =
-tous les types) et l'exigence de vestiaires, sans compte GitHub ni édition
-manuelle de `config.yaml`. Le lien (avec la clé d'accès)
-est ajouté automatiquement à la fin de chaque notification Telegram/email.
+Atelier, Industriel, Bureau, Local commercial) et l'exigence de vestiaires,
+sans compte GitHub ni édition manuelle de `config.yaml`. Comme pour les
+quartiers, seuls les types cochés sont acceptés (il faut en cocher au
+moins un). Le lien (avec la clé d'accès) est ajouté automatiquement à la
+fin de chaque notification Telegram/email.
 
 Flux complet :
 1. La page envoie le formulaire à un **Cloudflare Worker** (`worker/`).
@@ -51,8 +52,11 @@ Flux complet :
    puis ferme l'issue avec un message de confirmation.
 4. Le prochain scan (au plus tard dans 3h) utilise les nouveaux critères.
 
-**Mise en place (une seule fois)** — le code est déjà en place, il reste à
-déployer le Worker :
+**État actuel : déployé et fonctionnel** (Worker live à
+`https://boxing-gym-criteria.boxinggym-tracker.workers.dev`, `config.yaml`
+→ `output.criteria_worker_url` déjà renseigné, testé de bout en bout avec
+de vraies soumissions). Les étapes ci-dessous ne sont utiles que pour
+redéployer ailleurs ou en cas de recréation du Worker :
 1. Créer un compte Cloudflare gratuit (workers.dev) si besoin.
 2. Créer un **PAT GitHub fine-grained** (Settings → Developer settings →
    Fine-grained tokens) limité à ce repo, permission **Issues: Read and
@@ -62,6 +66,9 @@ déployer le Worker :
    `npx wrangler secret put EXPECTED_KEY` (coller la valeur du secret
    GitHub `CRITERIA_EDIT_TOKEN`, voir section secrets ci-dessous).
 4. `npx wrangler deploy` → note l'URL `https://boxing-gym-criteria.<ton-compte>.workers.dev`.
+   Sous Windows/PowerShell, si `npx` est bloqué par la politique
+   d'exécution de scripts (`... est désactivée sur ce système`), utiliser
+   `npx.cmd` à la place — ce n'est pas concerné par cette restriction.
 5. Mettre cette URL dans `config.yaml` → `output.criteria_worker_url`,
    commit/push. Elle sera embarquée dans `docs/criteria.html` au prochain
    run.

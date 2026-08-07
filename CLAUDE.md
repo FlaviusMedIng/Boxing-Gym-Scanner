@@ -6,13 +6,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A scanner that looks for commercial premises to rent in Geneva suitable for a
 boxing gym (the user's father's business). It scrapes several Swiss real
-estate sites, filters by surface/rent/district/changing-room keywords, keeps
-history in SQLite, and notifies by Telegram/email. It runs for free on GitHub
-Actions (cron every 3h) — there is no server, no paid hosting, no database
-other than the committed SQLite file.
+estate sites, filters by surface/rent/district/property-type/changing-room
+keywords, keeps history in SQLite, and notifies by Telegram/email. It runs
+for free on GitHub Actions (cron every 3h) — there is no server, no paid
+hosting, no database other than the committed SQLite file. The father, who
+is not technical, edits the search criteria himself from a public web page
+(no GitHub account needed) — see the `docs/criteria.html` section below.
 
-GitHub repo: `FlaviusMedIng/Boxing-Gym-Scanner` (private). Telegram and email
-notification secrets are already configured on that repo.
+GitHub repo: `FlaviusMedIng/Boxing-Gym-Scanner` (public since 2026-08-07,
+specifically so GitHub Pages could serve the results/criteria site — see
+below). Telegram, email, and criteria-edit secrets are already configured
+on that repo (`TELEGRAM_*`, `EMAIL_*`, `CRITERIA_EDIT_TOKEN`).
 
 ## Commands
 
@@ -22,7 +26,7 @@ playwright install chromium     # required once, Playwright drives real Chromium
 
 python main.py                  # run one full scan: scrape -> filter/score -> SQLite -> exports -> notify
 streamlit run dashboard/app.py  # browse data/listings.db locally (all listings, not just matches)
-python -m py_compile main.py scrapers/*.py utils/*.py storage/*.py filters/*.py scoring/*.py notifier/*.py dashboard/app.py
+python -m py_compile main.py scrapers/*.py utils/*.py storage/*.py filters/*.py scoring/*.py notifier/*.py dashboard/app.py scripts/*.py
 ```
 
 There is no unit test suite. Scrapers are validated by fetching the real site
@@ -191,15 +195,34 @@ block-style (`- item` per line) and substituted the same way in
 exact equality in `filters/gym_filter.py`, not substring search like
 district, because the vocabulary is closed (`PROPERTY_TYPES`) so there's no
 need for that leniency and it avoids an accent-encoding mismatch between a
-criteria label and free text. Gated by a shared token (`CRITERIA_EDIT_TOKEN` GitHub secret, passed
-as `?key=` in the link main.py builds) checked server-side by a Cloudflare
-Worker (`worker/criteria-worker.js`), never embedded in the static HTML.
-The Worker creates a GitHub issue titled `[criteria-update] ...`;
-`.github/workflows/apply-criteria.yml` + `scripts/apply_criteria_update.py`
-parse it and edit `config.yaml` by targeted regex substitution (not a full
-YAML dump) specifically to preserve the file's existing comments — don't
-replace that with `yaml.safe_dump`. The district checkbox list must stay in
-sync with `utils/parser.DISTRICTS` (imported directly, not duplicated).
+criteria label and free text.
+
+The whole form is gated by a shared token (`CRITERIA_EDIT_TOKEN` GitHub
+secret, passed as `?key=` in the link `main.py` builds) checked
+server-side by a Cloudflare Worker (`worker/criteria-worker.js`, live at
+`https://boxing-gym-criteria.boxinggym-tracker.workers.dev`), never
+embedded in the static HTML. The Worker creates a GitHub issue titled
+`[criteria-update] ...`; `.github/workflows/apply-criteria.yml` +
+`scripts/apply_criteria_update.py` parse it and edit `config.yaml` by
+targeted regex substitution (not a full YAML dump) specifically to
+preserve the file's existing comments — don't replace that with
+`yaml.safe_dump`. Both the district and property-type lists exist as
+manually-synced copies in `worker/criteria-worker.js` (JS can't import
+Python) — any change to `utils.parser.DISTRICTS` or `PROPERTY_TYPES` needs
+the same edit there **and a `wrangler deploy` from `worker/`**, or the form
+silently drops whatever's missing from the copy before it ever reaches the
+GitHub issue (this exact bug happened 2026-08-07 with a newly-added
+district). `scripts/apply_criteria_update.py` avoids this by importing
+`utils.parser.DISTRICTS`/`PROPERTY_TYPES` directly instead of copying —
+prefer that pattern for anything Python-side. See [[criteria-edit-flow]]
+in memory for the full incident list from shipping this feature.
+
+**`.github/workflows/scanner.yml` has a `concurrency` group** (added
+2026-08-07) so an overlapping manual `workflow_dispatch` and scheduled cron
+run queue instead of racing — both used to try to `git commit`/`git push`
+the scan data at the same time, and whichever lost the race failed outright
+(its scrape was silently discarded). Don't remove the concurrency block to
+"speed things up."
 
 **`data/listings.db` schema drift:** `storage/database.py` will detect if an
 existing SQLite file has a different column set than expected (from an
