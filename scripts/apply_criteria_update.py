@@ -16,8 +16,9 @@ from pathlib import Path
 
 import yaml
 
+from utils.parser import DISTRICTS as KNOWN_DISTRICTS
+
 CONFIG_PATH = Path("config.yaml")
-KNOWN_DISTRICTS = ["Champel", "Eaux-Vives", "Rive", "Rives", "Plainpalais", "Jonction", "Carouge", "Acacias"]
 
 
 def parse_issue_body(body: str) -> dict:

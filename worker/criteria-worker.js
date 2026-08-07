@@ -15,7 +15,17 @@
  * Variable non secrète (dans wrangler.toml) : GITHUB_REPO = "FlaviusMedIng/Boxing-Gym-Scanner"
  */
 
-const DISTRICTS = ["Champel", "Eaux-Vives", "Rive", "Rives", "Plainpalais", "Jonction", "Carouge", "Acacias"];
+// Copie obligatoire de utils/parser.py::DISTRICTS — un Worker Cloudflare ne
+// peut pas importer de code Python, donc cette liste doit être tenue à jour
+// manuellement à chaque changement côté Python (et redéployée : `wrangler
+// deploy`). Un déséquilibre ici filtre silencieusement les quartiers absents
+// de cette copie (bug vécu le 2026-08-07 : "Cornavin" coché sur le
+// formulaire mais retiré silencieusement avant même d'atteindre l'issue
+// GitHub).
+const DISTRICTS = [
+  "Champel", "Eaux-Vives", "Rive", "Rives", "Plainpalais", "Jonction", "Carouge", "Acacias",
+  "Cornavin", "Pâquis", "Servette", "Grottes", "Petit-Saconnex", "Charmilles",
+];
 
 function corsHeaders(origin) {
   return {
