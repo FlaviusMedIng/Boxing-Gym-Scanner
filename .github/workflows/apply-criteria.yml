@@ -25,6 +25,10 @@ jobs:
         id: apply
         env:
           ISSUE_BODY: ${{ github.event.issue.body }}
+          # Sans ça, `python scripts/apply_criteria_update.py` met scripts/
+          # (pas la racine du repo) sur sys.path, et `from utils.parser
+          # import ...` échoue avec ModuleNotFoundError.
+          PYTHONPATH: ${{ github.workspace }}
         run: python scripts/apply_criteria_update.py
 
       - name: Commit and push config.yaml
