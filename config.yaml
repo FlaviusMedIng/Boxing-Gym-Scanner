@@ -1,19 +1,9 @@
 criteria:
   min_surface_m2: 50
-  max_rent_chf_month: 10000
+  max_rent_chf_month: 10500
   allowed_districts:
     - Champel
     - Eaux-Vives
-    - Rive
-    - Rives
-    - Plainpalais
-    - Jonction
-    - Cornavin
-    - Pâquis
-    - Servette
-    - Grottes
-    - Petit-Saconnex
-    - Charmilles
   require_possible_changing_rooms: true
   changing_room_keywords:
     - vestiaire
