@@ -23360,3 +23360,74 @@ Call log:
 2026-08-17 15:33:59,389 [INFO] Run complete. Total scraped=208 | processed=208 | new=0 | changed=4
 2026-08-17 15:33:59,773 [INFO] Telegram notification sent.
 2026-08-17 15:34:02,436 [INFO] Email notification sent.
+2026-08-17 18:41:42,553 [INFO] Running scraper: realadvisor
+2026-08-17 18:41:42,553 [INFO] [realadvisor] Fetching https://realadvisor.ch/fr/louer/ville-geneve/commercial
+2026-08-17 18:41:46,919 [INFO] [realadvisor] page 1: 24 annonces (24 nouvelles)
+2026-08-17 18:41:46,919 [INFO] realadvisor returned 24 listings
+2026-08-17 18:41:46,919 [INFO] Running scraper: rosset
+2026-08-17 18:41:46,919 [INFO] [rosset] Fetching https://www.rosset.ch/louer
+2026-08-17 18:41:52,588 [INFO] [rosset] page 1: 0 annonces (0 nouvelles)
+2026-08-17 18:41:52,589 [INFO] rosset returned 0 listings
+2026-08-17 18:41:52,589 [INFO] Running scraper: pilet_renaud
+2026-08-17 18:41:52,952 [INFO] [pilet_renaud] Playwright → https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent#dHJhbnNhY3Rpb249cmVudCZ0eXBlPUFSQ0FERSZyb29tX21pbj0xJnJvb21fbWF4PTEyJnByaWNlX21heD04NTAwMDAmcHJpY2VfbWluPTEwMDAwJnN1cmZhY2VfbWluPTUmc3VyZmFjZV9tYXg9MTUwMCZvcmRlcl9ieT1hc2M=
+2026-08-17 18:41:59,919 [INFO] [pilet_renaud] 11 liens a.item-link trouvés
+2026-08-17 18:41:59,922 [INFO] [pilet_renaud] https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent#dHJhbnNhY3Rpb249cmVudCZ0eXBlPUFSQ0FERSZyb29tX21pbj0xJnJvb21fbWF4PTEyJnByaWNlX21heD04NTAwMDAmcHJpY2VfbWluPTEwMDAwJnN1cmZhY2VfbWluPTUmc3VyZmFjZV9tYXg9MTUwMCZvcmRlcl9ieT1hc2M=: 11 annonces
+2026-08-17 18:41:59,922 [INFO] [pilet_renaud] Playwright → https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent#dHJhbnNhY3Rpb249cmVudCZ0eXBlPURFUE9UJnJvb21fbWluPTEmcm9vbV9tYXg9MTImcHJpY2VfbWF4PTg1MDAwMCZwcmljZV9taW49MTAwMDAmc3VyZmFjZV9taW49NSZzdXJmYWNlX21heD0xNTAwJm9yZGVyX2J5PWFzYw==
+2026-08-17 18:42:04,950 [INFO] [pilet_renaud] 11 liens a.item-link trouvés
+2026-08-17 18:42:04,952 [INFO] [pilet_renaud] https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent#dHJhbnNhY3Rpb249cmVudCZ0eXBlPURFUE9UJnJvb21fbWluPTEmcm9vbV9tYXg9MTImcHJpY2VfbWF4PTg1MDAwMCZwcmljZV9taW49MTAwMDAmc3VyZmFjZV9taW49NSZzdXJmYWNlX21heD0xNTAwJm9yZGVyX2J5PWFzYw==: 0 annonces
+2026-08-17 18:42:04,982 [INFO] [pilet_renaud] 11 annonces trouvées au total
+2026-08-17 18:42:04,982 [INFO] pilet_renaud returned 11 listings
+2026-08-17 18:42:04,982 [INFO] Running scraper: immobilier_ch
+2026-08-17 18:42:04,982 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton
+2026-08-17 18:42:09,791 [INFO] [immobilier_ch] page 1: 18 annonces (18 nouvelles)
+2026-08-17 18:42:11,792 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton/page-2
+2026-08-17 18:42:15,855 [INFO] [immobilier_ch] page 2: 17 annonces (17 nouvelles)
+2026-08-17 18:42:17,856 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton/page-3
+2026-08-17 18:42:21,916 [INFO] [immobilier_ch] page 3: 18 annonces (18 nouvelles)
+2026-08-17 18:42:23,917 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton/page-4
+2026-08-17 18:42:29,759 [INFO] [immobilier_ch] page 4: 14 annonces (14 nouvelles)
+2026-08-17 18:42:31,759 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton/page-5
+2026-08-17 18:42:35,855 [INFO] [immobilier_ch] page 5: 19 annonces (19 nouvelles)
+2026-08-17 18:42:37,855 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton/page-6
+2026-08-17 18:42:41,903 [INFO] [immobilier_ch] page 6: 16 annonces (14 nouvelles)
+2026-08-17 18:42:41,903 [INFO] immobilier_ch returned 100 listings
+2026-08-17 18:42:41,903 [INFO] Running scraper: acheter_louer
+2026-08-17 18:42:41,903 [INFO] [acheter_louer] Fetching https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html
+2026-08-17 18:44:12,187 [WARNING] [acheter_louer] Tentative 1 échouée sur https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html (Page.goto: Timeout 90000ms exceeded.
+Call log:
+  - navigating to "https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html", waiting until "networkidle"
+), nouvel essai dans 3s
+2026-08-17 18:45:45,493 [WARNING] [acheter_louer] Tentative 2 échouée sur https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html (Page.goto: Timeout 90000ms exceeded.
+Call log:
+  - navigating to "https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html", waiting until "networkidle"
+), nouvel essai dans 6s
+2026-08-17 18:47:21,773 [ERROR] [acheter_louer] Erreur sur https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html: Page.goto: Timeout 90000ms exceeded.
+Call log:
+  - navigating to "https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html", waiting until "networkidle"
+
+2026-08-17 18:47:21,773 [INFO] acheter_louer returned 0 listings
+2026-08-17 18:47:21,773 [INFO] Running scraper: naef
+2026-08-17 18:47:21,773 [INFO] [naef] Fetching https://www.naef.ch/louer/surface-commerciales/geneve/geneve-ville/?sortingField=prix_desc&zoom=8
+2026-08-17 18:47:32,938 [INFO] [naef] page 1: 18 annonces (18 nouvelles)
+2026-08-17 18:47:32,938 [INFO] [naef] Fetching https://www.naef.ch/louer/depots/geneve/geneve-ville/?sortingField=prix_desc&zoom=8
+2026-08-17 18:47:42,958 [INFO] [naef] page 1: 9 annonces (9 nouvelles)
+2026-08-17 18:47:42,959 [INFO] naef returned 27 listings
+2026-08-17 18:47:42,960 [INFO] Running scraper: moservernet
+2026-08-17 18:47:42,960 [INFO] [moservernet] Fetching https://www.moservernet.ch/louer/arcades-geneve_ateliers-geneve_bureaux-geneve_surfaces-commerciales-geneve/
+2026-08-17 18:47:55,016 [INFO] [moservernet] page 1: 0 annonces (0 nouvelles)
+2026-08-17 18:47:55,016 [INFO] [moservernet] Fetching https://www.moservernet.ch/louer/depots-geneve/
+2026-08-17 18:48:03,955 [INFO] [moservernet] page 1: 0 annonces (0 nouvelles)
+2026-08-17 18:48:03,955 [INFO] moservernet returned 0 listings
+2026-08-17 18:48:03,955 [INFO] Running scraper: netimmo
+2026-08-17 18:48:03,955 [INFO] [netimmo] Fetching https://www.netimmo.ch/local-commercial-a-louer-ville-geneve
+2026-08-17 18:48:06,191 [INFO] [netimmo] page 1: 12 annonces (12 nouvelles)
+2026-08-17 18:48:08,192 [INFO] [netimmo] Fetching https://www.netimmo.ch/local-commercial-a-louer-ville-geneve?p=2
+2026-08-17 18:48:10,190 [INFO] [netimmo] page 2: 12 annonces (12 nouvelles)
+2026-08-17 18:48:12,191 [INFO] [netimmo] Fetching https://www.netimmo.ch/local-commercial-a-louer-ville-geneve?p=3
+2026-08-17 18:48:14,463 [INFO] [netimmo] page 3: 11 annonces (11 nouvelles)
+2026-08-17 18:48:16,463 [INFO] [netimmo] Fetching https://www.netimmo.ch/local-commercial-a-louer-ville-geneve?p=4
+2026-08-17 18:48:18,044 [INFO] [netimmo] page 4: 16 annonces (16 nouvelles)
+2026-08-17 18:48:18,044 [INFO] netimmo returned 51 listings
+2026-08-17 18:48:23,178 [INFO] Run complete. Total scraped=213 | processed=213 | new=0 | changed=3
+2026-08-17 18:48:23,729 [INFO] Telegram notification sent.
+2026-08-17 18:48:27,544 [INFO] Email notification sent.
