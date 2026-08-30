@@ -11,6 +11,7 @@ criteria:
     - Carouge
     - Acacias
     - Cornavin
+    - Pâquis
     - Servette
     - Grottes
     - Petit-Saconnex
@@ -20,6 +21,7 @@ criteria:
   # (équivalent à "tout accepté", en attendant que le père restreigne).
   # Modifiable depuis docs/criteria.html sans toucher ce fichier.
   allowed_property_types:
+    - Dépôt
     - Arcade
     - Atelier
     - Industriel
