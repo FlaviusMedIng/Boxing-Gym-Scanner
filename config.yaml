@@ -11,7 +11,6 @@ criteria:
     - Carouge
     - Acacias
     - Cornavin
-    - Pâquis
     - Servette
     - Grottes
     - Petit-Saconnex
@@ -21,7 +20,6 @@ criteria:
   # (équivalent à "tout accepté", en attendant que le père restreigne).
   # Modifiable depuis docs/criteria.html sans toucher ce fichier.
   allowed_property_types:
-    - Dépôt
     - Arcade
     - Atelier
     - Industriel
@@ -165,4 +163,4 @@ runtime:
   # scripts/apply_criteria_update.py quand ce champ est modifié depuis le
   # site. Approximatif autour des changements d'heure d'été/hiver (le cron
   # GitHub Actions est fixé en UTC, sans notion de fuseau horaire).
-  scan_hour_geneva: 17
+  scan_hour_geneva: 18
