@@ -144,3 +144,17 @@ streamlit run dashboard/app.py
   lien des notifications ; doit avoir la même valeur que le secret
   `EXPECTED_KEY` du Cloudflare Worker (voir "Modifier les critères depuis
   le site")
+- WORKFLOW_EDIT_TOKEN — PAT fine-grained (permissions **Contents: Read and
+  write** + **Workflows: Read and write**, limité à ce repo, **No
+  expiration**), configuré (2026-08-30). Nécessaire uniquement parce que
+  `GITHUB_TOKEN` ne peut jamais pousser de changement sous
+  `.github/workflows/` (restriction GitHub non contournable via
+  `permissions:` — confirmé en cassant tout le workflow en essayant) ; sans
+  lui, le champ "Heure du scan" de `docs/criteria.html` mettrait à jour
+  `config.yaml` mais pas le cron réel dans `scanner.yml`. Les PAT
+  fine-grained expirent par défaut sur une courte durée si "No expiration"
+  n'est pas explicitement choisi à la création — **CRITERIA_EDIT_TOKEN a
+  déjà expiré une fois** (le formulaire de critères a été cassé silencieusement
+  pendant plusieurs jours avant d'être détecté) ; vérifier régulièrement
+  que `wrangler secret list` / ce secret sont toujours valides, ou
+  régénérer en cas de doute plutôt que d'attendre un échec.

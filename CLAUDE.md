@@ -231,14 +231,39 @@ whichever of CEST/CET is in effect *then*, but will drift by 1h after the
 next DST transition (late March / late October) until someone resubmits
 the same hour to re-derive the right UTC offset. This is a deliberate
 simplification, not a bug to "fix" with a twice-yearly auto-adjust job —
-low stakes for a daily hobby-project scan. Pushing a change to a file under
-`.github/workflows/` requires the `workflows: write` permission on the
-`GITHUB_TOKEN` — `contents: write` alone is not enough and the push fails
-silently-ish (surfaced only as the generic apply-criteria failure comment);
-`apply-criteria.yml` declares it explicitly. `config.yaml`'s
-`runtime.scan_hour_geneva` is purely informational (prefills the form) —
-the cron line in `scanner.yml` is the actual source of truth for when the
-scan runs.
+low stakes for a daily hobby-project scan.
+
+**`GITHUB_TOKEN` can never push a change under `.github/workflows/`, full
+stop — this is a hard platform restriction, not something `permissions:`
+can grant.** Confirmed the hard way (2026-08-30): adding
+`permissions: { workflows: write }` to `apply-criteria.yml` doesn't grant
+the capability, it makes GitHub reject the *entire workflow file* as
+invalid — 0 jobs run at all, silently, for every future issue including
+ones unrelated to the scan hour (a real user request, issue #9, went
+unprocessed this way; don't reintroduce that key). The actual fix: the
+`Checkout repository` step passes `token: ${{ secrets.WORKFLOW_EDIT_TOKEN
+|| secrets.GITHUB_TOKEN }}` — `WORKFLOW_EDIT_TOKEN` is a separate
+fine-grained PAT (Contents + Workflows: Read and write, scoped to this
+repo, **No expiration** — configured 2026-08-30) that actually can push
+under `.github/workflows/`. `scripts/apply_criteria_update.py` checks the
+`ALLOW_WORKFLOW_EDIT` env var (set from `secrets.WORKFLOW_EDIT_TOKEN !=
+''`) before touching `scanner.yml` — without the PAT it still updates
+`config.yaml`'s `runtime.scan_hour_geneva` (informational) but leaves
+`scanner.yml` alone, specifically to avoid staging a mixed commit whose
+push would fail in its entirety (GitHub rejects the whole push, not just
+the workflow-file part, when the token lacks the scope) and take the
+ordinary criteria fields down with it. `config.yaml`'s
+`runtime.scan_hour_geneva` is otherwise purely informational (prefills the
+form) — the cron line in `scanner.yml` is the real source of truth for
+when the scan runs.
+
+**Fine-grained PATs expire by default unless "No expiration" is picked
+explicitly at creation** — `CRITERIA_EDIT_TOKEN`'s Worker-side GitHub PAT
+(the one `worker/criteria-worker.js` uses to create issues) was created
+without that, and silently expired; the criteria-edit form was broken for
+an unknown number of days before anyone noticed (a live end-to-end test
+surfaced it). If the criteria-edit flow ever seems unresponsive, check for
+a `GitHub API error: 401` first — see [[criteria-edit-flow]] in memory.
 
 **`.github/workflows/scanner.yml` has a `concurrency` group** (added
 2026-08-07) so an overlapping manual `workflow_dispatch` and scheduled cron
