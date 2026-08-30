@@ -11,7 +11,7 @@ on:
     # octobre) tant que personne ne la réajuste. Modifiable depuis
     # docs/criteria.html ("Heure du scan"), qui réécrit cette ligne via
     # scripts/apply_criteria_update.py — voir CLAUDE.md.
-    - cron: '0 16 * * *'
+    - cron: '0 15 * * *'
 permissions:
   contents: write
 # Sans ça, un déclenchement manuel qui chevauche le cron programmé fait

@@ -163,4 +163,4 @@ runtime:
   # scripts/apply_criteria_update.py quand ce champ est modifié depuis le
   # site. Approximatif autour des changements d'heure d'été/hiver (le cron
   # GitHub Actions est fixé en UTC, sans notion de fuseau horaire).
-  scan_hour_geneva: 18
+  scan_hour_geneva: 17
