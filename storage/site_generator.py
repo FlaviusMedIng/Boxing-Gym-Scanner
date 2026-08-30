@@ -301,8 +301,8 @@ render();
 
 def generate_criteria_page(config: dict, output_path: str = "docs/criteria.html", worker_url: str = "") -> None:
     """Génère une page de formulaire permettant de modifier les critères de
-    recherche (surface, loyer, quartiers, vestiaires) sans compte GitHub ni
-    édition manuelle de config.yaml.
+    recherche (surface, loyer, quartiers, types, vestiaires, heure du scan
+    quotidien) sans compte GitHub ni édition manuelle de config.yaml.
 
     Le formulaire poste au Cloudflare Worker `worker_url`, qui crée une
     issue GitHub ; une GitHub Action applique ensuite l'issue à config.yaml
@@ -347,6 +347,7 @@ def generate_criteria_page(config: dict, output_path: str = "docs/criteria.html"
         "__CHANGING_ROOM_CHECKED__",
         "checked" if criteria.get("require_possible_changing_rooms", True) else "",
     )
+    html = html.replace("__SCAN_HOUR__", str(config.get("runtime", {}).get("scan_hour_geneva", 17)))
     html = html.replace("__WORKER_URL__", json.dumps(worker_url))
 
     out.write_text(html, encoding="utf-8")
@@ -403,7 +404,7 @@ _CRITERIA_TEMPLATE = """<!doctype html>
 <body>
 <header>
   <h1>Modifier les critères de recherche</h1>
-  <p>Ces changements seront appliqués automatiquement au prochain scan (toutes les 3h). <a href="index.html">← Voir les annonces</a></p>
+  <p>Ces changements seront appliqués automatiquement au prochain scan quotidien. <a href="index.html">← Voir les annonces</a></p>
 </header>
 <main>
   <div class="panel">
@@ -433,6 +434,10 @@ __TYPE_CHECKBOXES__
           <input type="checkbox" id="changing-room" __CHANGING_ROOM_CHECKED__>
           N'accepter que les locaux avec vestiaires/sanitaires possibles
         </label>
+      </div>
+      <div class="field">
+        <label class="title" for="scan-hour">Heure du scan quotidien (heure de Genève)</label>
+        <input type="number" id="scan-hour" min="0" max="23" step="1" value="__SCAN_HOUR__" required>
       </div>
       <button type="submit" id="submit-btn">Envoyer les nouveaux critères</button>
       <div id="status"></div>
@@ -471,6 +476,7 @@ document.getElementById('f').addEventListener('submit', async (e) => {
     allowed_districts: districts,
     allowed_property_types: propertyTypes,
     require_possible_changing_rooms: document.getElementById('changing-room').checked,
+    scan_hour_geneva: Number(document.getElementById('scan-hour').value),
   };
 
   try {

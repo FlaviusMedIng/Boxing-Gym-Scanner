@@ -5,6 +5,12 @@ on:
 permissions:
   contents: write
   issues: write
+  # Nécessaire uniquement parce que ce workflow peut réécrire le cron dans
+  # .github/workflows/scanner.yml (heure du scan modifiable depuis le
+  # site) — GitHub refuse par défaut qu'un token pousse un changement sous
+  # .github/workflows/ sans cette permission explicite, même avec
+  # contents: write.
+  workflows: write
 jobs:
   apply:
     if: startsWith(github.event.issue.title, '[criteria-update]')
@@ -35,7 +41,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add config.yaml
+          git add config.yaml .github/workflows/scanner.yml
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
@@ -49,7 +55,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ "${{ steps.apply.outcome }}" = "success" ]; then
-            gh issue comment ${{ github.event.issue.number }} --body "Critères mis à jour. Ils seront appliqués au prochain scan (toutes les 3h)."
+            gh issue comment ${{ github.event.issue.number }} --body "Critères mis à jour. Ils seront appliqués au prochain scan quotidien."
             gh issue close ${{ github.event.issue.number }}
           else
             gh issue comment ${{ github.event.issue.number }} --body "La demande n'a pas pu être appliquée (valeurs invalides). Réessaie depuis le formulaire."

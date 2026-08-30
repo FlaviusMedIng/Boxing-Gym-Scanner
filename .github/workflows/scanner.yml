@@ -2,7 +2,16 @@ name: geneva-gym-scanner
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 */3 * * *'
+    # Un scan par jour (demandé le 2026-08-30, avant c'était toutes les 3h).
+    # L'heure ci-dessous est en UTC ; GitHub Actions ne gère pas les fuseaux
+    # horaires, donc elle correspond à l'heure de Genève voulue (17h) au
+    # moment de la dernière mise à jour de ce fichier, en tenant compte de
+    # l'heure d'été/hiver alors en vigueur (CEST=UTC+2 / CET=UTC+1) — sujette
+    # à un décalage d'1h autour des changements d'heure (fin mars, fin
+    # octobre) tant que personne ne la réajuste. Modifiable depuis
+    # docs/criteria.html ("Heure du scan"), qui réécrit cette ligne via
+    # scripts/apply_criteria_update.py — voir CLAUDE.md.
+    - cron: '0 15 * * *'
 permissions:
   contents: write
 # Sans ça, un déclenchement manuel qui chevauche le cron programmé fait

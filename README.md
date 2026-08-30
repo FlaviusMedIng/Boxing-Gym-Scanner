@@ -12,8 +12,12 @@ Scanner gratuit hébergé sur GitHub Actions pour repérer des locaux commerciau
 - stocke l'historique dans SQLite
 - exporte Excel et CSV
 - détecte nouvelles annonces / annonces modifiées / annonces supprimées
-- notifications Telegram et email
-- exécution automatique toutes les 3 heures via GitHub Actions
+  (toujours suivies en base et sur le site, même sans notification)
+- notifications Telegram et email — déclenchées uniquement par de
+  nouvelles annonces (une annonce modifiée seule, sans nouveauté, ne
+  notifie plus rien depuis le passage au scan quotidien)
+- exécution automatique une fois par jour via GitHub Actions (heure
+  modifiable depuis le site, voir "Modifier les critères depuis le site")
 - dashboard Streamlit local
 - **site web statique** (`docs/index.html`) listant toutes les annonces et
   celles qui correspondent aux critères, avec lien direct vers chaque
@@ -36,11 +40,12 @@ URL : <https://flaviusmeding.github.io/Boxing-Gym-Scanner/>
 ## Modifier les critères depuis le site
 `docs/criteria.html` permet de changer la surface minimum, le loyer
 maximum, les quartiers acceptés, le(s) type(s) de bien (Dépôt, Arcade,
-Atelier, Industriel, Bureau, Local commercial) et l'exigence de vestiaires,
-sans compte GitHub ni édition manuelle de `config.yaml`. Comme pour les
-quartiers, seuls les types cochés sont acceptés (il faut en cocher au
-moins un). Le lien (avec la clé d'accès) est ajouté automatiquement à la
-fin de chaque notification Telegram/email.
+Atelier, Industriel, Bureau, Local commercial), l'exigence de vestiaires,
+et l'heure du scan quotidien, sans compte GitHub ni édition manuelle de
+`config.yaml`/`scanner.yml`. Comme pour les quartiers, seuls les types
+cochés sont acceptés (il faut en cocher au moins un). Le lien (avec la clé
+d'accès) est ajouté automatiquement à la fin de chaque notification
+Telegram/email.
 
 Flux complet :
 1. La page envoie le formulaire à un **Cloudflare Worker** (`worker/`).
@@ -48,9 +53,11 @@ Flux complet :
    valeurs demandées (le Worker est le seul endroit qui détient un token
    GitHub capable d'écrire sur le repo — jamais exposé côté client).
 3. La GitHub Action `.github/workflows/apply-criteria.yml` lit l'issue,
-   met à jour `config.yaml` (`scripts/apply_criteria_update.py`), commite,
-   puis ferme l'issue avec un message de confirmation.
-4. Le prochain scan (au plus tard dans 3h) utilise les nouveaux critères.
+   met à jour `config.yaml` et, si l'heure du scan a changé, le cron dans
+   `.github/workflows/scanner.yml` (`scripts/apply_criteria_update.py`),
+   commite, puis ferme l'issue avec un message de confirmation.
+4. Le prochain scan (le lendemain à l'heure configurée, au plus tard) utilise
+   les nouveaux critères.
 
 **État actuel : déployé et fonctionnel** (Worker live à
 `https://boxing-gym-criteria.boxinggym-tracker.workers.dev`, `config.yaml`

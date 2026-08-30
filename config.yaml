@@ -159,3 +159,10 @@ runtime:
   # nombre de nouvelles tentatives en cas d'échec réseau/timeout.
   delay_between_requests_seconds: 2
   max_retries: 2
+  # Heure de Genève à laquelle le scan quotidien tourne. Purement informatif
+  # ici (préremplit le champ sur docs/criteria.html) — la valeur qui compte
+  # réellement est le cron dans .github/workflows/scanner.yml, réécrit par
+  # scripts/apply_criteria_update.py quand ce champ est modifié depuis le
+  # site. Approximatif autour des changements d'heure d'été/hiver (le cron
+  # GitHub Actions est fixé en UTC, sans notion de fuseau horaire).
+  scan_hour_geneva: 17

@@ -77,12 +77,16 @@ export default {
       ? payload.allowed_property_types.filter((t) => PROPERTY_TYPES.includes(t))
       : [];
     const changingRoom = payload.require_possible_changing_rooms === true;
+    const scanHour = Number(payload.scan_hour_geneva);
 
     if (!Number.isFinite(surface) || surface < 1 || surface > 5000) {
       return jsonResponse({ ok: false, error: "Surface invalide" }, 400, origin);
     }
     if (!Number.isFinite(rent) || rent < 1 || rent > 100000) {
       return jsonResponse({ ok: false, error: "Loyer invalide" }, 400, origin);
+    }
+    if (!Number.isInteger(scanHour) || scanHour < 0 || scanHour > 23) {
+      return jsonResponse({ ok: false, error: "Heure de scan invalide" }, 400, origin);
     }
     if (districts.length === 0) {
       return jsonResponse({ ok: false, error: "Sélectionne au moins un quartier" }, 400, origin);
@@ -99,6 +103,7 @@ export default {
       `quartiers: ${districts.join(", ")}`,
       `types: ${propertyTypes.join(", ")}`,
       `vestiaires_requis: ${changingRoom ? "oui" : "non"}`,
+      `heure_scan: ${scanHour}`,
     ].join("\n");
 
     const ghResponse = await fetch(`https://api.github.com/repos/${env.GITHUB_REPO}/issues`, {

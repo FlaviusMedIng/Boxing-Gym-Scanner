@@ -95,20 +95,17 @@ def main() -> int:
         len(all_raw), len(processed), len(new_listings), len(changed_listings)
     )
 
-    messages: list[str] = []
+    # Notification déclenchée uniquement par de VRAIES nouvelles annonces —
+    # une annonce modifiée (prix, etc.) sans nouvelle annonce ce jour-là ne
+    # déclenche plus rien (demandé par le user le 2026-08-30, pour un scan
+    # quotidien plutôt que toutes les 3h : les changements seuls sont encore
+    # suivis en base/sur le site, juste plus notifiés par message).
     if new_listings:
-        messages.append(
+        joined_message = (
             "Nouvelles annonces:\n\n" +
             "\n\n".join(format_listing_message(x) for x in new_listings[:10])
         )
-    if changed_listings:
-        messages.append(
-            "Annonces modifiées:\n\n" +
-            "\n\n".join(format_listing_message(x) for x in changed_listings[:10])
-        )
 
-    joined_message = "\n\n---\n\n".join(messages).strip()
-    if joined_message:
         if site_url:
             links_footer = (
                 f"\n\n---\n\nVoir toutes les annonces: {site_url}/"
@@ -136,7 +133,7 @@ def main() -> int:
                 attachment_path=site_path,
             )
     else:
-        logger.info("No new or changed matching listings.")
+        logger.info("No new matching listings (changed_listings=%s, not notified).", len(changed_listings))
 
     return 0
 

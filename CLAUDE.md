@@ -7,11 +7,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A scanner that looks for commercial premises to rent in Geneva suitable for a
 boxing gym (the user's father's business). It scrapes several Swiss real
 estate sites, filters by surface/rent/district/property-type/changing-room
-keywords, keeps history in SQLite, and notifies by Telegram/email. It runs
-for free on GitHub Actions (cron every 3h) — there is no server, no paid
-hosting, no database other than the committed SQLite file. The father, who
-is not technical, edits the search criteria himself from a public web page
-(no GitHub account needed) — see the `docs/criteria.html` section below.
+keywords, keeps history in SQLite, and notifies by Telegram/email — only
+when there are genuinely **new** matching listings (changed-only runs are
+still tracked in the DB/site but no longer notify, since 2026-08-30). It
+runs for free on GitHub Actions (cron once a day — changed from every 3h on
+2026-08-30) — there is no server, no paid hosting, no database other than
+the committed SQLite file. The father, who is not technical, edits the
+search criteria himself from a public web page (no GitHub account needed)
+— see the `docs/criteria.html` section below.
 
 GitHub repo: `FlaviusMedIng/Boxing-Gym-Scanner` (public since 2026-08-07,
 specifically so GitHub Pages could serve the results/criteria site — see
@@ -41,7 +44,8 @@ writing/fixing a selector — see "Debugging a scraper" below.
 score) → `storage/database.py` (SQLite upsert, tracks new/changed/removed) →
 `storage/excel_export.py` (CSV/XLSX) + `storage/site_generator.py`
 (`docs/index.html`) → `notifier/*` (Telegram + email, only fires if there are
-new/changed **matching** listings this run).
+**new** matching listings this run — changed-only listings are tracked but
+don't trigger a notification, since 2026-08-30).
 
 **Filtering/scoring lives in exactly one place: `main.py`.** `BaseScraper`
 and site scrapers must only return raw listings from `parse_list_page`/
@@ -176,8 +180,8 @@ why. It's still also attached to the email for offline viewing.
 **`storage/site_generator.py`** also renders `docs/criteria.html` (via
 `generate_criteria_page`), a form letting the father change
 `min_surface_m2` / `max_rent_chf_month` / `allowed_districts` /
-`allowed_property_types` / `require_possible_changing_rooms` without a
-GitHub account or touching this repo. `allowed_property_types` behaves
+`allowed_property_types` / `require_possible_changing_rooms` /
+`scan_hour_geneva` without a GitHub account or touching this repo. `allowed_property_types` behaves
 exactly like `allowed_districts`: only checked types are accepted, and the
 Worker/`apply_criteria_update.py` both reject a submission with none
 checked — a first version made empty mean "accept all types", which the
@@ -216,6 +220,25 @@ district). `scripts/apply_criteria_update.py` avoids this by importing
 `utils.parser.DISTRICTS`/`PROPERTY_TYPES` directly instead of copying —
 prefer that pattern for anything Python-side. See [[criteria-edit-flow]]
 in memory for the full incident list from shipping this feature.
+
+**`scan_hour_geneva` (added 2026-08-30) is the one criteria-form field that
+edits a *workflow* file, not just `config.yaml`:** `apply_criteria_update.py`
+also rewrites the `cron:` line in `.github/workflows/scanner.yml` (via
+`apply_to_scanner_workflow_text` / `geneva_hour_to_utc`), converting the
+requested Geneva local hour to UTC using `zoneinfo("Europe/Zurich")`
+evaluated at the moment the request is processed — so it's correct for
+whichever of CEST/CET is in effect *then*, but will drift by 1h after the
+next DST transition (late March / late October) until someone resubmits
+the same hour to re-derive the right UTC offset. This is a deliberate
+simplification, not a bug to "fix" with a twice-yearly auto-adjust job —
+low stakes for a daily hobby-project scan. Pushing a change to a file under
+`.github/workflows/` requires the `workflows: write` permission on the
+`GITHUB_TOKEN` — `contents: write` alone is not enough and the push fails
+silently-ish (surfaced only as the generic apply-criteria failure comment);
+`apply-criteria.yml` declares it explicitly. `config.yaml`'s
+`runtime.scan_hour_geneva` is purely informational (prefills the form) —
+the cron line in `scanner.yml` is the actual source of truth for when the
+scan runs.
 
 **`.github/workflows/scanner.yml` has a `concurrency` group** (added
 2026-08-07) so an overlapping manual `workflow_dispatch` and scheduled cron
