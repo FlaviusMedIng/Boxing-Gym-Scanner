@@ -5,12 +5,6 @@ on:
 permissions:
   contents: write
   issues: write
-  # Nécessaire uniquement parce que ce workflow peut réécrire le cron dans
-  # .github/workflows/scanner.yml (heure du scan modifiable depuis le
-  # site) — GitHub refuse par défaut qu'un token pousse un changement sous
-  # .github/workflows/ sans cette permission explicite, même avec
-  # contents: write.
-  workflows: write
 jobs:
   apply:
     if: startsWith(github.event.issue.title, '[criteria-update]')
@@ -18,6 +12,18 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # GITHUB_TOKEN (même avec `permissions: contents: write`, et même
+          # si on ajoute `permissions: workflows: write` — testé et confirmé
+          # cassé le 2026-08-30 : ça invalide le workflow entier, 0 jobs ne
+          # tournent plus du tout) ne peut JAMAIS pousser de changement sous
+          # .github/workflows/ — restriction GitHub non contournable via
+          # permissions:. Un PAT dédié avec la permission "Workflows: Read
+          # and write" est nécessaire pour ça ; voir WORKFLOW_EDIT_TOKEN
+          # dans README.md. S'il est absent, ce step utilise GITHUB_TOKEN et
+          # tout continue de marcher SAUF la réécriture de scanner.yml (le
+          # step suivant ignore silencieusement cette partie dans ce cas).
+          token: ${{ secrets.WORKFLOW_EDIT_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -35,6 +41,12 @@ jobs:
           # (pas la racine du repo) sur sys.path, et `from utils.parser
           # import ...` échoue avec ModuleNotFoundError.
           PYTHONPATH: ${{ github.workspace }}
+          # Si WORKFLOW_EDIT_TOKEN n'est pas configuré, le checkout a utilisé
+          # GITHUB_TOKEN (qui ne peut pas pousser sous .github/workflows/) :
+          # le script doit alors s'abstenir de modifier scanner.yml, sinon
+          # un commit mixte config.yaml+scanner.yml échouerait en bloc au
+          # push (GitHub rejette tout le commit, pas juste ce fichier).
+          ALLOW_WORKFLOW_EDIT: ${{ secrets.WORKFLOW_EDIT_TOKEN != '' }}
         run: python scripts/apply_criteria_update.py
 
       - name: Commit and push config.yaml

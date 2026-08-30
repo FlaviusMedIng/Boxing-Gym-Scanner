@@ -177,7 +177,22 @@ def main() -> int:
         CONFIG_PATH.write_text(updated, encoding="utf-8")
         changed_files.append(str(CONFIG_PATH))
 
-    if values.get("scan_hour_geneva") is not None:
+    # GITHUB_TOKEN ne peut jamais pousser un changement sous
+    # .github/workflows/ (restriction GitHub, pas contournable via
+    # permissions:) ; seul WORKFLOW_EDIT_TOKEN (un PAT dédié, voir
+    # README.md) le peut. Sans lui, on modifie quand même
+    # config.yaml/scan_hour_geneva (ci-dessus) pour garder une trace de la
+    # demande, mais on n'y touche pas scanner.yml — sinon le commit mixte
+    # échouerait en bloc au push, cassant aussi la mise à jour du reste des
+    # critères.
+    allow_workflow_edit = os.environ.get("ALLOW_WORKFLOW_EDIT", "false").lower() == "true"
+    if values.get("scan_hour_geneva") is not None and not allow_workflow_edit:
+        print(
+            "heure_scan demandée mais WORKFLOW_EDIT_TOKEN absent : "
+            "config.yaml mis à jour, scanner.yml laissé tel quel.",
+            file=sys.stderr,
+        )
+    elif values.get("scan_hour_geneva") is not None:
         original_workflow = SCANNER_WORKFLOW_PATH.read_text(encoding="utf-8")
         updated_workflow = apply_to_scanner_workflow_text(original_workflow, values["scan_hour_geneva"])
         # Filet de sécurité : le fichier doit rester un YAML valide.
