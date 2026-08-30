@@ -49,6 +49,24 @@ sees the website and the notifications.
   checkbox semantics, don't get clever with "empty = permissive" without
   checking with him first.
 
+- **Daily scan, not every 3h.** As of 2026-08-30, at the user's request:
+  the scan runs once a day (father-configurable time via the site, default
+  17h Geneva) instead of every 3 hours, and notifications fire only when
+  there are genuinely new matching listings — a changed-only day (price
+  update, etc.) no longer sends a Telegram/email, though the change is
+  still tracked in the DB and visible on the site. The goal was a
+  lower-noise daily digest rather than frequent pings. See
+  [[criteria-edit-flow]] for the scan-hour self-service mechanism and the
+  GitHub permissions wrinkle it ran into.
+- **Credentials in this project have expired silently before, twice.**
+  Both the Worker's GitHub PAT (creates issues) and, separately, a
+  father-facing feature (the criteria form) went dark for days without
+  anyone noticing until a live end-to-end test caught it — because a
+  fine-grained PAT was created without "No expiration" explicitly set.
+  When setting up any new PAT for this project, always set No expiration
+  and mention it explicitly to the user, rather than assuming the default
+  is safe.
+
 ## Related memory
 
 - [[criteria-edit-flow]] — architecture, deployment status (live), and the
