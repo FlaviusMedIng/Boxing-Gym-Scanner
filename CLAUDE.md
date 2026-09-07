@@ -296,4 +296,48 @@ the scan data at the same time, and whichever lost the race failed outright
 existing SQLite file has a different column set than expected (from an
 older version of this project) and transparently rebuild the table rather
 than crashing on the first `INSERT`/`UPDATE` — the data is a regenerable
-scan cache, not hand-authored content, so this is safe.
+scan cache, not hand-authored content, so this is safe. Note this only
+rebuilds `listings`, not `price_history` (added 2026-09-07, see below) --
+that table's own `CREATE TABLE IF NOT EXISTS` is independent and never
+needs to survive a `listings` rebuild losing its own real history.
+
+**`price_history` table (added 2026-09-07):** one row per REAL price change
+per listing (the first observation, then only when `price_chf` actually
+differs from what's stored — not on every "changed" upsert, which can also
+fire from a text/status change alone). `Database.upsert_listing()` writes to
+it internally; `price_history_summary()` (one grouped query for all
+listings, not N+1) and `price_history_for(listing_id)` read it back. Uses
+its own `id AUTOINCREMENT` as the tie-breaker for "first"/"latest" rather
+than `recorded_at` alone -- `recorded_at` only has second precision
+(`CURRENT_TIMESTAMP`), so two price points written within the same second
+(easy to hit in a quick sequence, not just tests) would otherwise have an
+undefined order under `ROW_NUMBER() OVER (ORDER BY recorded_at)` — a real
+bug caught by a real assertion-based smoke test before this shipped, not
+guessed at. `site_generator.py`'s public site shows a "Prix en baisse"
+badge and `dashboard/app.py` has a price-history line chart per listing,
+both computed from this table. Deliberately does **not** trigger a
+Telegram/email notification on its own — that would contradict the
+2026-08-30 decision that mere changes (as opposed to genuinely new
+listings) stay silent; a price drop instead surfaces via `days_listed`/the
+weekly digest below.
+
+**`days_listed` (added 2026-09-07):** computed on the fly from the existing
+`first_seen_at` column (no new column needed) in both `site_generator.py`
+and `dashboard/app.py` — treated explicitly as UTC (`CURRENT_TIMESTAMP` has
+no timezone suffix) rather than compared against an aware `now` naively.
+Shown on every listing card/row and used to sort "Plus ancien d'abord" on
+the public site, and to build the "levier de négociation" table in the
+dashboard and the weekly digest.
+
+**`scripts/weekly_digest.py` (added 2026-09-07):** separate entry point
+from `main.py`, own workflow (`.github/workflows/weekly-digest.yml`, Monday
+07:00 UTC, same DST caveat as `scanner.yml`). Reads the existing
+`data/listings.db` (already committed by the daily scan) and reuses
+`notifier/telegram_notifier.py`/`notifier/email_notifier.py` -- does not
+scrape, does not need Playwright, does not modify the database. Summarizes:
+active matching listings (top 5 by score), those listed 21+ days (the
+negotiation-leverage signal `days_listed` exists for), and those with a
+confirmed price drop (`price_history_summary()`). This is the intended
+place for price-drop/long-listing insight to actually reach the user
+proactively, since the daily scan's own notification path stays silent on
+anything short of a genuinely new listing (see `price_history` note above).

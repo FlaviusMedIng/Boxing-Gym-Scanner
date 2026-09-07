@@ -7,7 +7,20 @@ from pathlib import Path
 from utils.parser import DISTRICTS, PROPERTY_TYPES
 
 
-def _row_to_dict(row) -> dict:
+def _days_listed(first_seen_at: str | None, now: datetime) -> int | None:
+    if not first_seen_at:
+        return None
+    try:
+        # SQLite CURRENT_TIMESTAMP est "YYYY-MM-DD HH:MM:SS" en UTC, sans info
+        # de fuseau -- on la traite explicitement comme UTC plutot que de
+        # laisser un datetime naif se comparer a `now` (aware) et lever.
+        first_seen = datetime.strptime(first_seen_at, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+    except ValueError:
+        return None
+    return max(0, (now - first_seen).days)
+
+
+def _row_to_dict(row, price_info: dict, now: datetime) -> dict:
     return {
         "site": row["site"],
         "title": row["title"] or "(sans titre)",
@@ -22,6 +35,9 @@ def _row_to_dict(row) -> dict:
         "url": row["url"],
         "first_seen_at": row["first_seen_at"],
         "last_seen_at": row["last_seen_at"],
+        "days_listed": _days_listed(row["first_seen_at"], now),
+        "initial_price_chf": price_info.get("first_price_chf"),
+        "price_dropped": bool(price_info.get("price_dropped")),
     }
 
 
@@ -33,13 +49,18 @@ def generate_site(db, config: dict, output_path: str = "docs/index.html") -> Non
     sont embarquées en JSON et filtrées côté client en JavaScript.
     """
     df = db.dataframe()
+    price_summary = db.price_history_summary()
+    now = datetime.now(timezone.utc)
     if df.empty:
         rows = []
     else:
         # NaN (colonnes numériques pandas) n'est pas du JSON valide et ferait
         # échouer JSON.parse() côté client : on le remplace par null/None.
         df = df.astype(object).where(df.notna(), None)
-        rows = [_row_to_dict(r) for r in df.to_dict("records")]
+        rows = [
+            _row_to_dict(r, price_summary.get(r["id"], {}), now)
+            for r in df.to_dict("records")
+        ]
 
     out = Path(output_path)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -186,6 +207,13 @@ _TEMPLATE = """<!doctype html>
       <input type="checkbox" id="f-matches-only" checked>
       Correspond aux critères uniquement
     </label>
+    <label>Trier par
+      <select id="f-sort">
+        <option value="score">Score</option>
+        <option value="oldest">Plus ancien d'abord</option>
+        <option value="price_asc">Prix croissant</option>
+      </select>
+    </label>
   </div>
 
   <div class="grid" id="grid"></div>
@@ -205,6 +233,7 @@ const els = {
   surface: document.getElementById('f-surface'),
   status: document.getElementById('f-status'),
   matchesOnly: document.getElementById('f-matches-only'),
+  sort: document.getElementById('f-sort'),
   grid: document.getElementById('grid'),
   empty: document.getElementById('empty'),
   stats: document.getElementById('stats'),
@@ -256,7 +285,16 @@ function render() {
     if (!isNaN(minSurface) && d.surface_m2 != null && d.surface_m2 < minSurface) return false;
     if (text && !(d.title || '').toLowerCase().includes(text)) return false;
     return true;
-  }).sort((a, b) => (b.score || 0) - (a.score || 0));
+  });
+
+  const sortMode = els.sort.value;
+  if (sortMode === 'oldest') {
+    filtered.sort((a, b) => (b.days_listed ?? -1) - (a.days_listed ?? -1));
+  } else if (sortMode === 'price_asc') {
+    filtered.sort((a, b) => (a.price_chf ?? Infinity) - (b.price_chf ?? Infinity));
+  } else {
+    filtered.sort((a, b) => (b.score || 0) - (a.score || 0));
+  }
 
   els.stats.innerHTML = `
     <div class="stat"><div class="n">${DATA.length}</div><div class="l">annonces au total</div></div>
@@ -280,6 +318,8 @@ function render() {
         ${d.property_type ? `<span>${escapeHtml(d.property_type)}</span>` : ''}
         ${d.possible_changing_room ? '<span class="badge">Vestiaires possibles</span>' : ''}
         ${d.status !== 'active' ? `<span class="badge">${escapeHtml(d.status)}</span>` : ''}
+        ${d.days_listed != null ? `<span>En ligne depuis ${d.days_listed} jour${d.days_listed === 1 ? '' : 's'}</span>` : ''}
+        ${d.price_dropped ? `<span class="badge good">Prix en baisse ↓ (initial ${d.initial_price_chf != null ? d.initial_price_chf.toLocaleString('fr-CH') : '?'} CHF)</span>` : ''}
       </div>
       <a class="cta" href="${escapeHtml(d.url)}" target="_blank" rel="noopener">Voir l'annonce →</a>
     </div>
@@ -288,7 +328,7 @@ function render() {
   els.empty.style.display = filtered.length ? 'none' : 'block';
 }
 
-for (const el of [els.text, els.site, els.district, els.type, els.price, els.surface, els.status, els.matchesOnly]) {
+for (const el of [els.text, els.site, els.district, els.type, els.price, els.surface, els.status, els.matchesOnly, els.sort]) {
   el.addEventListener('input', render);
   el.addEventListener('change', render);
 }

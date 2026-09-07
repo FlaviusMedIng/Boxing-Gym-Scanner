@@ -18,7 +18,18 @@ Scanner gratuit hébergé sur GitHub Actions pour repérer des locaux commerciau
   notifie plus rien depuis le passage au scan quotidien)
 - exécution automatique une fois par jour via GitHub Actions (heure
   modifiable depuis le site, voir "Modifier les critères depuis le site")
-- dashboard Streamlit local
+- **historique de prix par annonce** : chaque changement de prix réel est
+  enregistré (table `price_history`), pas juste le prix courant — permet de
+  repérer les annonces dont le loyer a baissé depuis leur découverte
+- **suivi de durée de publication** : le site et le dashboard affichent
+  depuis combien de temps chaque annonce est en ligne (un bien qui traîne
+  longtemps est un vrai levier de négociation)
+- **digest hebdomadaire** (en plus des alertes quotidiennes immédiates) :
+  chaque lundi, un résumé Telegram/email des annonces actives correspondant
+  aux critères, celles en ligne depuis longtemps, et celles dont le prix a
+  baissé — voir `scripts/weekly_digest.py`
+- dashboard Streamlit local, avec carte interactive (un marqueur par
+  annonce, groupés par quartier) et graphique d'évolution de prix
 - **site web statique** (`docs/index.html`) listant toutes les annonces et
   celles qui correspondent aux critères, avec lien direct vers chaque
   annonce — généré à chaque run, publié gratuitement via GitHub Pages à
@@ -96,14 +107,20 @@ redéployer ailleurs ou en cas de recréation du Worker :
   résidentiel), pas assez de volume pour justifier un scraper dédié.
 - **regiefonciere.ch** (Régie Foncière SA) : pas de scraper dédié — ses
   annonces sont déjà republiées sur immobilier.ch, qui est déjà couvert.
-- **immostreet.ch** : appartient au même groupe (Swiss Marketplace Group)
-  que homegate.ch/immoscout24.ch, donc probablement protégé par le même
-  système anti-bot — pas testé individuellement, écarté par précaution pour
-  la même raison.
-- **immoadvisor.com** : candidat identifié (2026-08-07), contenu réel
-  détecté (777 mentions "CHF" sur la page de résultats Genève, statut 200),
-  mais pas encore de sélecteur CSS validé — à investiguer si plus de
-  couverture est souhaitée.
+- **immoadvisor.com** : testé réellement le 2026-09-07 (Playwright headless,
+  pas juste une requête brute) — bloqué par Cloudflare ("Just a moment...",
+  403), même catégorie que homegate.ch/comparis.ch ci-dessus. La supposition
+  précédente ("candidat, contenu détecté") n'a pas résisté au vrai test.
+- **immostreet.ch** : testé réellement le 2026-09-07, contrairement à ce qui
+  était supposé — **pas** de protection anti-bot (200 OK, vrai contenu), et
+  ses annonces pointent même directement vers les IDs immoscout24.ch/
+  homegate.ch (même groupe, données resyndiquées). Le vrai blocage est
+  ailleurs : `/fr/louer/local-commercial/geneve` renvoie un flux promotionnel
+  national non filtré (appartements meublés partout en Suisse, aucun lien
+  avec Genève ni le commercial) et `/fr/louer/commerce-industrie` a les bons
+  types d'annonces mais sans filtre géographique. Trouver le bon paramètre
+  d'URL demanderait de piloter le vrai formulaire de recherche du site — pas
+  fait cette fois, piste à reprendre avec plus de temps (voir CLAUDE.md).
 - **Gérance Immobilière Municipale (geneve.ch)** : la Ville de Genève loue
   elle-même bureaux/arcades/dépôts/ateliers, liste publiée en PDF (pas en
   HTML scrapable directement) et via un processus de candidature/dépôt de
