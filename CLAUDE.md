@@ -129,6 +129,24 @@ reasoning, including netimmo.ch as an identified-but-not-yet-implemented
 candidate (real static listings, no anti-bot detected, ~2000 Geneva
 commercial listings, just needs selector work).
 
+**immostreet.ch — investigated 2026-09-07, not implemented, but for a
+different reason than the anti-bot list above:** no bot protection at all
+(200 OK, real content) and its listing pages actually forward to
+immoscout24.ch/homegate.ch's own listing IDs — genuinely the same SMG-group
+inventory as the blocked sites, reachable without touching their protected
+pages. The blocker is that `/fr/louer/local-commercial/geneve` (the URL its
+own share/pagination links confirm as canonical) returns a **nationwide
+promotional/sponsored feed** (furnished "City Pop" apartment listings in
+Zürich/Basel/Bern, a villa, random offices — confirmed via a real fetch and
+full listing dump, not assumed) with no working geographic filter, while
+`/fr/louer/commerce-industrie` (no geo scope) returns genuinely correct
+commercial listing types (Bureau, Commerce) but for all of Switzerland, not
+just Geneva. Finding the real query-parameter scheme for a Geneva-scoped
+commercial search would need driving the site's actual search form live
+(the quick location-input attempt failed — hit a hidden `price_from` field
+instead) rather than guessing another URL. Worth retrying with more time,
+not pursued further this pass given diminishing returns on this one site.
+
 **`scrapers/moservernet.py` gotcha:** the listing page's static HTML
 contains real, server-rendered listing cards (`div[data-id]` →
 `.property-card__title`) *and*, elsewhere in the same DOM, an unrendered
