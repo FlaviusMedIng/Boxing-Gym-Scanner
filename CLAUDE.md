@@ -113,7 +113,9 @@ and skip, they don't crash the run).
 **Anti-bot policy — a firm project rule, not a TODO:** homegate.ch and
 comparis.ch (and, by the same reasoning, immoscout24.ch, properstar.com,
 anibis.ch, newhome.ch — confirmed 2026-08-07, Cloudflare "Just a moment..."
-403) run active bot-detection (Cloudflare interstitial, DataDome CAPTCHA, a
+403; immoadvisor.com — confirmed 2026-09-07, same Cloudflare challenge page
+and 403, real headless-Chromium test via Playwright, not just a raw HTTP
+request) run active bot-detection (Cloudflare interstitial, DataDome CAPTCHA, a
 "security check" page) that blocks even a real headless browser. These are
 deliberately left `enabled: false` in `config.yaml` with a comment
 explaining why. Do not attempt stealth/undetected-browser tricks or CAPTCHA
