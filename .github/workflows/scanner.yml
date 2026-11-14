@@ -24,7 +24,9 @@ concurrency:
   cancel-in-progress: false
 jobs:
   run-scanner:
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest moved to 26.04 (Nov 2026) and Playwright 1.52 cannot
+    # install chromium deps there ("does not support chromium on ubuntu26.04-x64").
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
