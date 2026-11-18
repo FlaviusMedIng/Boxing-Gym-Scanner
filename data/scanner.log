@@ -34468,3 +34468,89 @@ Call log:
 2026-11-17 22:59:46,599 [INFO] Run complete. Total scraped=248 | processed=248 | new=1 | changed=0
 2026-11-17 22:59:47,117 [INFO] Telegram notification sent.
 2026-11-17 22:59:49,914 [INFO] Email notification sent.
+2026-11-18 22:39:57,504 [INFO] Running scraper: realadvisor
+2026-11-18 22:39:57,504 [INFO] [realadvisor] Fetching https://realadvisor.ch/fr/louer/ville-geneve/commercial
+2026-11-18 22:40:00,152 [INFO] [realadvisor] page 1: 24 annonces (24 nouvelles)
+2026-11-18 22:40:00,152 [INFO] realadvisor returned 24 listings
+2026-11-18 22:40:00,152 [INFO] Running scraper: rosset
+2026-11-18 22:40:00,152 [INFO] [rosset] Fetching https://www.rosset.ch/louer
+2026-11-18 22:40:16,289 [INFO] [rosset] page 1: 2 annonces (2 nouvelles)
+2026-11-18 22:40:16,289 [INFO] rosset returned 2 listings
+2026-11-18 22:40:16,289 [INFO] Running scraper: pilet_renaud
+2026-11-18 22:40:16,564 [INFO] [pilet_renaud] Playwright → https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent#dHJhbnNhY3Rpb249cmVudCZ0eXBlPUFSQ0FERSZyb29tX21pbj0xJnJvb21fbWF4PTEyJnByaWNlX21heD04NTAwMDAmcHJpY2VfbWluPTEwMDAwJnN1cmZhY2VfbWluPTUmc3VyZmFjZV9tYXg9MTUwMCZvcmRlcl9ieT1hc2M=
+2026-11-18 22:40:39,556 [ERROR] Scraper pilet_renaud failed: Page.goto: net::ERR_CONNECTION_CLOSED at https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent#dHJhbnNhY3Rpb249cmVudCZ0eXBlPUFSQ0FERSZyb29tX21pbj0xJnJvb21fbWF4PTEyJnByaWNlX21heD04NTAwMDAmcHJpY2VfbWluPTEwMDAwJnN1cmZhY2VfbWluPTUmc3VyZmFjZV9tYXg9MTUwMCZvcmRlcl9ieT1hc2M=
+Call log:
+  - navigating to "https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent#dHJhbnNhY3Rpb249cmVudCZ0eXBlPUFSQ0FERSZyb29tX21pbj0xJnJvb21fbWF4PTEyJnByaWNlX21heD04NTAwMDAmcHJpY2VfbWluPTEwMDAwJnN1cmZhY2VfbWluPTUmc3VyZmFjZV9tYXg9MTUwMCZvcmRlcl9ieT1hc2M=", waiting until "domcontentloaded"
+Traceback (most recent call last):
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/main.py", line 43, in main
+    items = scraper.scrape()
+            ^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Boxing-Gym-Scanner/Boxing-Gym-Scanner/scrapers/pilet_renaud.py", line 38, in scrape
+    page.goto(url, wait_until="domcontentloaded", timeout=60000)
+  File "/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/playwright/sync_api/_generated.py", line 9024, in goto
+    self._sync(
+  File "/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/playwright/_impl/_page.py", line 552, in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/playwright/_impl/_frame.py", line 145, in goto
+    await self._channel.send("goto", locals_to_params(locals()))
+  File "/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/playwright/_impl/_connection.py", line 61, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/playwright/_impl/_connection.py", line 528, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: Page.goto: net::ERR_CONNECTION_CLOSED at https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent#dHJhbnNhY3Rpb249cmVudCZ0eXBlPUFSQ0FERSZyb29tX21pbj0xJnJvb21fbWF4PTEyJnByaWNlX21heD04NTAwMDAmcHJpY2VfbWluPTEwMDAwJnN1cmZhY2VfbWluPTUmc3VyZmFjZV9tYXg9MTUwMCZvcmRlcl9ieT1hc2M=
+Call log:
+  - navigating to "https://www.pilet-renaud.ch/fr/accueil/search/transaction/rent#dHJhbnNhY3Rpb249cmVudCZ0eXBlPUFSQ0FERSZyb29tX21pbj0xJnJvb21fbWF4PTEyJnByaWNlX21heD04NTAwMDAmcHJpY2VfbWluPTEwMDAwJnN1cmZhY2VfbWluPTUmc3VyZmFjZV9tYXg9MTUwMCZvcmRlcl9ieT1hc2M=", waiting until "domcontentloaded"
+
+2026-11-18 22:40:39,557 [INFO] Running scraper: immobilier_ch
+2026-11-18 22:40:39,557 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton
+2026-11-18 22:40:43,698 [INFO] [immobilier_ch] page 1: 24 annonces (24 nouvelles)
+2026-11-18 22:40:45,698 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton/page-2
+2026-11-18 22:40:49,829 [INFO] [immobilier_ch] page 2: 23 annonces (15 nouvelles)
+2026-11-18 22:40:51,829 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton/page-3
+2026-11-18 22:40:55,860 [INFO] [immobilier_ch] page 3: 19 annonces (19 nouvelles)
+2026-11-18 22:40:57,860 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton/page-4
+2026-11-18 22:41:02,717 [INFO] [immobilier_ch] page 4: 17 annonces (17 nouvelles)
+2026-11-18 22:41:04,718 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton/page-5
+2026-11-18 22:41:08,639 [INFO] [immobilier_ch] page 5: 21 annonces (21 nouvelles)
+2026-11-18 22:41:10,639 [INFO] [immobilier_ch] Fetching https://www.immobilier.ch/fr/louer/commercial-industriel/geneve/canton/page-6
+2026-11-18 22:41:14,889 [INFO] [immobilier_ch] page 6: 22 annonces (20 nouvelles)
+2026-11-18 22:41:14,889 [INFO] immobilier_ch returned 116 listings
+2026-11-18 22:41:14,889 [INFO] Running scraper: acheter_louer
+2026-11-18 22:41:14,889 [INFO] [acheter_louer] Fetching https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html
+2026-11-18 22:42:45,186 [WARNING] [acheter_louer] Tentative 1 échouée sur https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html (Page.goto: Timeout 90000ms exceeded.
+Call log:
+  - navigating to "https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html", waiting until "networkidle"
+), nouvel essai dans 3s
+2026-11-18 22:44:18,483 [WARNING] [acheter_louer] Tentative 2 échouée sur https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html (Page.goto: Timeout 90000ms exceeded.
+Call log:
+  - navigating to "https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html", waiting until "networkidle"
+), nouvel essai dans 6s
+2026-11-18 22:45:54,784 [ERROR] [acheter_louer] Erreur sur https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html: Page.goto: Timeout 90000ms exceeded.
+Call log:
+  - navigating to "https://www.acheter-louer.ch/louer/geneve-locaux-commerciaux-a-louer.html", waiting until "networkidle"
+
+2026-11-18 22:45:54,785 [INFO] acheter_louer returned 0 listings
+2026-11-18 22:45:54,785 [INFO] Running scraper: naef
+2026-11-18 22:45:54,785 [INFO] [naef] Fetching https://www.naef.ch/louer/surface-commerciales/geneve/geneve-ville/?sortingField=prix_desc&zoom=8
+2026-11-18 22:46:01,188 [INFO] [naef] page 1: 0 annonces (0 nouvelles)
+2026-11-18 22:46:01,188 [INFO] [naef] Fetching https://www.naef.ch/louer/depots/geneve/geneve-ville/?sortingField=prix_desc&zoom=8
+2026-11-18 22:46:49,217 [INFO] [naef] page 1: 8 annonces (8 nouvelles)
+2026-11-18 22:46:49,217 [INFO] naef returned 8 listings
+2026-11-18 22:46:49,217 [INFO] Running scraper: moservernet
+2026-11-18 22:46:49,217 [INFO] [moservernet] Fetching https://www.moservernet.ch/louer/arcades-geneve_ateliers-geneve_bureaux-geneve_surfaces-commerciales-geneve/
+2026-11-18 22:47:08,896 [INFO] [moservernet] page 1: 0 annonces (0 nouvelles)
+2026-11-18 22:47:08,896 [INFO] [moservernet] Fetching https://www.moservernet.ch/louer/depots-geneve/
+2026-11-18 22:47:23,721 [INFO] [moservernet] page 1: 0 annonces (0 nouvelles)
+2026-11-18 22:47:23,721 [INFO] moservernet returned 0 listings
+2026-11-18 22:47:23,721 [INFO] Running scraper: netimmo
+2026-11-18 22:47:23,721 [INFO] [netimmo] Fetching https://www.netimmo.ch/local-commercial-a-louer-ville-geneve
+2026-11-18 22:47:26,247 [INFO] [netimmo] page 1: 0 annonces (0 nouvelles)
+2026-11-18 22:47:26,247 [INFO] netimmo returned 0 listings
+2026-11-18 22:47:27,302 [INFO] Run complete. Total scraped=150 | processed=150 | new=1 | changed=0
+2026-11-18 22:47:27,820 [INFO] Telegram notification sent.
+2026-11-18 22:47:30,621 [INFO] Email notification sent.
